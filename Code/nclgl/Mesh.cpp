@@ -1,4 +1,4 @@
-#include "Mesh.h"
+#include "./../../nclgl/Mesh.h"
 
 Mesh::Mesh(void) {
 for (int i = 0; i < MAX_BUFFER; ++i) {
