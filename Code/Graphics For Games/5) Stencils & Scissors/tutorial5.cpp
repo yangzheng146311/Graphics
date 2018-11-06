@@ -1,6 +1,5 @@
 #include "../../nclGL/window.h"
 #include "Renderer.h"
-
 #pragma comment(lib, "nclgl.lib")
 
 int main() {	
