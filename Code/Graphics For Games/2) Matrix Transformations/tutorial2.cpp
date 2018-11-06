@@ -1,6 +1,6 @@
 #pragma comment(lib, "nclgl.lib")
 
-#include "../../nclGL/window.h"
+#include "../../nclgl/Window.h"
 //#include "./../../Graphics For Games/1) Your First Triangle/Renderer.h"
 #include"./../2) Matrix Transformations/Renderer.h"
 
@@ -53,6 +53,9 @@ int main() {
 		renderer.SetRotation(rotation);
 		renderer.SetScale(scale);
 		renderer.SetPosition(position);
+
+		renderer.UpdateScene(w.GetTimer()->GetTimedMS());
+
 		renderer.RenderScene();
 	}
 
