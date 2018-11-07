@@ -6,6 +6,8 @@
 	 parent = NULL;
 	 modelScale = Vector3(1, 1, 1);
 	
+	 boundingRadius = 1.0f; 
+	 distanceFromCamera = 0.0f;
 }
 
  SceneNode::~SceneNode(void) {
