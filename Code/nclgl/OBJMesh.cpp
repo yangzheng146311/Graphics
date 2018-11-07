@@ -1,5 +1,5 @@
 #include "OBJMesh.h"
-#ifdef WEEK_2_CODE
+//#ifdef WEEK_2_CODE
 /*
 OBJ files look generally something like this:
 
