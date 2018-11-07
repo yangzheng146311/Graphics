@@ -13,7 +13,7 @@
 	
 	 static void CreateCube() {
 		  OBJMesh *m = new OBJMesh();
-		  m->LoadOBJMesh("../../../Asset/Meshes/cube.obj");
+		  m->LoadOBJMesh("../../Meshes/cube.obj");
 		  cube = m;
 		 
 	 }

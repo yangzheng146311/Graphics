@@ -1,8 +1,8 @@
 #pragma once
-#include "./nclgl/OGLRenderer.h"
-#include "./nclgl/Camera.h"
-#include "./ncl/SceneNode.h"
-#include "CubeRobot.h"
+#include "../../nclgl/OGLRenderer.h"
+#include "../../nclgl/Camera.h"
+#include "../../nclgl/SceneNode.h"
+#include "./CubeRoot.h"
 
  class Renderer : public OGLRenderer {
  public:

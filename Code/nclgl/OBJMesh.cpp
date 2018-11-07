@@ -342,4 +342,4 @@ void	OBJMesh::SetTexturesFromMTL(string &mtlFile, string &mtlType) {
 	SetTexturesFromMTL(mtlFile,mtlType);
 }
 
-#endif
+//#endif

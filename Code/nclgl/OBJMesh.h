@@ -77,7 +77,7 @@ time lighting tutorial, uncomment both OBJ_USE_NORMALS and OBJ_USE_TANGENTS_BUMP
 #include "Vector3.h"
 #include "Vector2.h"
 #include "Mesh.h"
-#include "ChildMeshInterface.h"
+#include "../nclgl/ChildMeshInterface.h"
 
 #define OBJOBJECT		"object"	//the current line of the obj file defines the start of a new material
 #define OBJMTLLIB		"mtllib"
@@ -146,4 +146,4 @@ protected:
 	map <string, MTLInfo> materials;
 };
 
-#endif
+//#endif

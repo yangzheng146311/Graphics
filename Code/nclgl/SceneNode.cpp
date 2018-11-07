@@ -9,11 +9,15 @@
 }
 
  SceneNode::~SceneNode(void) {
+	 
 	 for (unsigned int i = 0; i < children.size(); ++i) {
+
+
 		 delete children[i];
-		
+
 	}
-	
+	 
+	 
 }
 
  void SceneNode::AddChild(SceneNode* s) {
@@ -23,7 +27,7 @@
 }
 
  void SceneNode::Draw(const OGLRenderer &r) {
-	  if (mesh) { mesh->Draw() };
+	 if (mesh) { mesh->Draw(); };
 	 
  }
 
