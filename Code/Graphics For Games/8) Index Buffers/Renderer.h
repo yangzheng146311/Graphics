@@ -10,5 +10,5 @@ virtual void RenderScene();
 virtual void UpdateScene(float msec);
 protected: 
 	HeightMap* heightMap; 
-	Camera* camera; 
+	Camera *camera; 
 };

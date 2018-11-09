@@ -40,11 +40,11 @@ GLuint Shader::GenerateShader(string from, GLenum type) {
 		GLuint shader = glCreateShader(type);
 	 
 		const char * chars = load.c_str();
-	glShaderSource(shader, 1, &chars, NULL);
-	glCompileShader(shader);
+	    glShaderSource(shader, 1, &chars, NULL);
+	    glCompileShader(shader);
 	 
 		GLint status;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+	    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 	 
 		if (status == GL_FALSE) {
 		cout << " Compiling failed !" << endl;
@@ -86,9 +86,9 @@ bool Shader::LoadShaderFile(string from, string & into) {
 	
 }
 void Shader::SetDefaultAttributes() {
-	 glBindAttribLocation(program, VERTEX_BUFFER, " position ");
+	 glBindAttribLocation(program, VERTEX_BUFFER, "position");
 
-	 glBindAttribLocation(program, COLOUR_BUFFER, " colour ");
+	 glBindAttribLocation(program, COLOUR_BUFFER, "colour");
 
 	 glBindAttribLocation(program, TEXTURE_BUFFER, "texCoord");
 	
