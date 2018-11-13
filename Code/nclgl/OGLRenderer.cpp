@@ -384,6 +384,14 @@ void	OGLRenderer::DrawDebugCircle(DebugDrawMode mode, const Vector3 &at, const f
 			Vector3(endx,endy,0),colour,colour);
 	}
 }
+void OGLRenderer::SetShaderLight(const Light &l) { 
+	glUniform3fv(glGetUniformLocation(currentShader->GetProgram(), 
+		"lightPos"), 1, (float*)&l.GetPosition()); 
+	glUniform4fv(glGetUniformLocation(currentShader->GetProgram(), 
+		"lightColour"), 1, (float*)&l.GetColour()); 
+	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), 
+		"lightRadius"), l.GetRadius());
+}
 
 
 
