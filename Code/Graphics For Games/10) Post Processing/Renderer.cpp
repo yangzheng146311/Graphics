@@ -1,6 +1,6 @@
 #include "Renderer.h" 
 Renderer::Renderer(Window &parent) : OGLRenderer(parent) {
-	camera = new Camera(0.0f, 135.0f, Vector3(0, 500, 0));
+	camera = new Camera(0.0f, 200.0f, Vector3(0, 500, 0));
 	quad = Mesh::GenerateQuad();
 	heightMap = new HeightMap(TEXTUREDIR"terrain.raw");
 	heightMap->SetTexture(

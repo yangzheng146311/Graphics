@@ -144,6 +144,7 @@ void Mesh::Draw() {
 	 glBindVertexArray(0);*/
 
 	//T3
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);  
 
 	glBindVertexArray(arrayObject); 
