@@ -16,21 +16,21 @@ texture = 0;
 textureCoords = NULL;
 indices = NULL; 
 numIndices = 0;
-tangents = NULL;
-bumpTexture = 0;
+//tangents = NULL;
+//bumpTexture = 0;
 }
 
 Mesh ::~Mesh(void) {
 	 glDeleteVertexArrays(1, &arrayObject);
 	 glDeleteTextures(1, &texture);
-	 glDeleteTextures(1, &bumpTexture); //Just like the texture map... 
+	// glDeleteTextures(1, &bumpTexture); //Just like the texture map... 
 	 glDeleteBuffers(MAX_BUFFER, bufferObject);
 	 delete[] vertices;
 	 delete[] colours; 
 	 delete[]textureCoords;
 	 delete[]indices;
 	 delete[]normals;
-	 delete[]tangents; 
+	// delete[]tangents; 
 	
 }
 
@@ -151,35 +151,25 @@ void Mesh::BufferData() {
 		}
 	
 
-	if (tangents) { 
-		glGenBuffers(1, &bufferObject[TANGENT_BUFFER]); 
-		glBindBuffer(GL_ARRAY_BUFFER, bufferObject[TANGENT_BUFFER]); 
-		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector3), 
-			tangents, GL_STATIC_DRAW); 
-		glVertexAttribPointer(TANGENT_BUFFER, 3, GL_FLOAT, GL_FALSE, 0, 0); 
-		glEnableVertexAttribArray(TANGENT_BUFFER);
-	}
+	//if (tangents) { 
+	//	glGenBuffers(1, &bufferObject[TANGENT_BUFFER]); 
+	//	glBindBuffer(GL_ARRAY_BUFFER, bufferObject[TANGENT_BUFFER]); 
+	//	glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector3), 
+	//		tangents, GL_STATIC_DRAW); 
+	//	glVertexAttribPointer(TANGENT_BUFFER, 3, GL_FLOAT, GL_FALSE, 0, 0); 
+	//	glEnableVertexAttribArray(TANGENT_BUFFER);
+	//}
 	glBindVertexArray(0);
 }
 void Mesh::Draw() {
-	 //T2
-	 /*glBindVertexArray(arrayObject);
-	 glDrawArrays(type, 0, numVertices);
-	 glBindVertexArray(0);*/
-
-	//T3
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);  
 
-	glActiveTexture(GL_TEXTURE1); //New!!! 
-	glBindTexture(GL_TEXTURE_2D , bumpTexture); //New!!! 
+	//glActiveTexture(GL_TEXTURE1); //New!!! 
+	//glBindTexture(GL_TEXTURE_2D , bumpTexture); //New!!! 
+
 	glBindVertexArray(arrayObject); 
-	//glDrawArrays(type, 0, numVertices); 
-	//glBindVertexArray(0);  
 	
-	
-	//T8
-	//glBindVertexArray(arrayObject); 
 	if (bufferObject[INDEX_BUFFER]) { 
 		glDrawElements(type, numIndices, GL_UNSIGNED_INT, 0); 
 	} 

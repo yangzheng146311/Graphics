@@ -3,15 +3,17 @@ Renderer::Renderer(Window &parent) : OGLRenderer(parent) {
 	camera = new Camera(0.0f,0.0f,Vector3( 
 		RAW_WIDTH*HEIGHTMAP_X / 2.0f,500,RAW_HEIGHT*HEIGHTMAP_Z)); 
 	heightMap = new HeightMap(TEXTUREDIR"terrain.raw"); 
+	/*currentShader = new Shader(SHADERDIR"PerPixelVertex.glsl",
+		SHADERDIR"PerPixelFragment.glsl");*/
 	currentShader = new Shader(SHADERDIR"bumpvertex.glsl", SHADERDIR"bumpfragment.glsl");
 	
 	heightMap ->SetTexture(SOIL_load_OGL_texture( 
 		TEXTUREDIR"Barren Reds.JPG", SOIL_LOAD_AUTO , 
 		SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS)); 
 
-	heightMap->SetBumpMap(SOIL_load_OGL_texture(
+	/*heightMap->SetBumpMap(SOIL_load_OGL_texture(
 		TEXTUREDIR"Barren RedsDOT3.JPG", SOIL_LOAD_AUTO,
-		SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+		SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));*/
 
 	if(!currentShader ->LinkProgram() || !heightMap ->GetTexture() ) { 
 		return; 
@@ -29,9 +31,9 @@ Renderer::Renderer(Window &parent) : OGLRenderer(parent) {
 }
 
 Renderer::~Renderer(void) { 
-	delete camera;
-	delete heightMap; 
+	delete camera; 
 	delete light;
+	delete heightMap;
 } 
 void Renderer::UpdateScene(float msec) { 
 	camera->UpdateCamera(msec); 
@@ -43,7 +45,7 @@ void Renderer::RenderScene() {
 	glUseProgram(currentShader->GetProgram()); 
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
 		"diffuseTex"), 0); 
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
+	/*glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);*/
 	glUniform3fv(glGetUniformLocation(currentShader->GetProgram(), 
 		"cameraPos"), 1, (float*)&camera->GetPosition()); 
 	UpdateShaderMatrices(); 
