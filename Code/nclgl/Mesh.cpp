@@ -189,8 +189,8 @@ void Mesh::Draw() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);  
 
-	glActiveTexture(GL_TEXTURE1); //New!!! 
-	glBindTexture(GL_TEXTURE_2D , bumpTexture); //New!!! 
+	//glActiveTexture(GL_TEXTURE1); //New!!! 
+	//glBindTexture(GL_TEXTURE_2D , bumpTexture); //New!!! 
 
 	glBindVertexArray(arrayObject); 
 	
@@ -202,7 +202,7 @@ void Mesh::Draw() {
 	} 
 	glBindVertexArray(0);
 
-	//glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 void Mesh::GenerateNormals() {
 	if (!normals) { 

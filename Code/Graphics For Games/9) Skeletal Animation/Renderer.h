@@ -4,6 +4,8 @@
 #include "../../nclgl/Camera.h"
 #include "../../nclgl/MD5Mesh.h"
 #include "../../nclgl/MD5Node.h"
+#include "../../nclgl/MD5Anim.h"
+#include "../../nclgl/MD5FileData.h"
 
 class Renderer : public OGLRenderer		{
 public:

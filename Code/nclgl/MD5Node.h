@@ -30,7 +30,7 @@ _-_-_-_-_-_-_-""  ""
 #ifdef USE_MD5MESH
 #ifdef WEEK_2_CODE
 #pragma once
-#include "scenenode.h"
+#include "SceneNode.h"
 #include "MD5FileData.h"
 #include "MD5Mesh.h"
 

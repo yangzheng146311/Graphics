@@ -1,7 +1,7 @@
 #include "Renderer.h"
 
 Renderer::Renderer(Window &parent) : OGLRenderer(parent)	{	
-	camera			= new Camera(0,-90.0f,Vector3(-180,60,0));
+	camera			= new Camera(0,-90.0f,Vector3(0,0,-100));
 
 #ifdef MD5_USE_HARDWARE_SKINNING
 	currentShader   = new Shader(SHADERDIR"skeletonVertexSimple.glsl", SHADERDIR"TexturedFragment.glsl");

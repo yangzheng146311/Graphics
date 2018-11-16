@@ -106,9 +106,12 @@ void Renderer::DrawWater() {
      float heightX = (RAW_WIDTH * HEIGHTMAP_X / 2.0f);
 	 float heightY = 256 * HEIGHTMAP_Y / 3.0f;
      float heightZ = (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f);
-     modelMatrix =
-     Matrix4::Translation(Vector3(heightX, heightY, heightZ)) *
-     Matrix4::Scale(Vector3(heightX, 1, heightZ)) * Matrix4::Rotation(90, Vector3(1.0f, 0.0f, 0.0f));
+	 modelMatrix =
+		 Matrix4::Translation(Vector3(heightX, heightY, heightZ))
+		 * Matrix4::Scale(Vector3(heightX, 1, heightZ))
+		 * Matrix4::Rotation(90, Vector3(1.0f, 0.0f, 0.0f));
+	 Matrix4::Rotation(waterRotate, Vector3(0.0f, 0.0f, 1.0f));
+	 textureMatrix = Matrix4::Scale(Vector3(10.0f, 10.0f, 10.0f)) *
 	 Matrix4::Rotation(waterRotate, Vector3(0.0f, 0.0f, 1.0f));
 	 UpdateShaderMatrices();
      quad->Draw();
