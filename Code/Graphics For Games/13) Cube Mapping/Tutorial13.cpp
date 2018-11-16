@@ -11,6 +11,7 @@ int main() {
 	
 	Renderer renderer(w);
 	if(!renderer.HasInitialised()) {
+
 		return -1;
 	}
 
