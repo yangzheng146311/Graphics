@@ -2,8 +2,9 @@
 #include "./../../nclgl/OGLRenderer.h"
 
 enum MeshBuffer {
-	//VERTEX_BUFFER, COLOUR_BUFFER, TEXTURE_BUFFER,NORMAL_BUFFER, TANGENT_BUFFER, INDEX_BUFFER, MAX_BUFFER
-	ERTEX_BUFFER, COLOUR_BUFFER, TEXTURE_BUFFER, NORMAL_BUFFER,  INDEX_BUFFER, MAX_BUFFER
+	VERTEX_BUFFER, COLOUR_BUFFER, TEXTURE_BUFFER,NORMAL_BUFFER, TANGENT_BUFFER, INDEX_BUFFER, MAX_BUFFER
+
+	//ERTEX_BUFFER, COLOUR_BUFFER, TEXTURE_BUFFER, NORMAL_BUFFER,  INDEX_BUFFER, MAX_BUFFER
 	
 };
 class Mesh {
@@ -17,8 +18,8 @@ static Mesh* GenerateQuad();
 void SetTexture(GLuint tex) { texture = tex; }
 GLuint GetTexture() { return texture; }
 //
-//void SetBumpMap(GLuint tex) { bumpTexture = tex; } 
-//GLuint GetBumpMap() { return bumpTexture;}
+void SetBumpMap(GLuint tex) { bumpTexture = tex; } 
+GLuint GetBumpMap() { return bumpTexture;}
 
 
 protected:

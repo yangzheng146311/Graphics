@@ -35,5 +35,7 @@ vec3 incident = normalize(lightPos - IN.worldPos);
  colour += (lightColour.rgb * sFactor) * 0.33; 
  fragColour = vec4(colour * atten * lambert , diffuse.a);
  fragColour.rgb += (diffuse.rgb * lightColour.rgb) * 0.1; 
+
+ //fragColour.rgb = vec3(texture(bumpTex ,  IN.texCoord).rgb);
  }
 

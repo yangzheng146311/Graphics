@@ -11,15 +11,15 @@ Renderer::Renderer(Window &parent) : OGLRenderer(parent) {
 		TEXTUREDIR"Barren Reds.JPG", SOIL_LOAD_AUTO , 
 		SOIL_CREATE_NEW_ID , SOIL_FLAG_MIPMAPS)); 
 
-	/*heightMap->SetBumpMap(SOIL_load_OGL_texture(
+	heightMap->SetBumpMap(SOIL_load_OGL_texture(
 		TEXTUREDIR"Barren RedsDOT3.JPG", SOIL_LOAD_AUTO,
-		SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));*/
+		SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 
 	if(!currentShader ->LinkProgram() || !heightMap ->GetTexture() ) { 
 		return; 
 	}
 	SetTextureRepeating(heightMap ->GetTexture(),true);
-	//SetTextureRepeating(heightMap->GetBumpMap(), true);
+	SetTextureRepeating(heightMap->GetBumpMap(), true);
 	light = new Light(Vector3((RAW_HEIGHT*HEIGHTMAP_X / 2.0f), 
 		500.0f, (RAW_HEIGHT*HEIGHTMAP_Z / 2.0f)), 
 		Vector4(1, 1, 1, 1), (RAW_WIDTH*HEIGHTMAP_X) / 2.0f); 
@@ -45,7 +45,7 @@ void Renderer::RenderScene() {
 	glUseProgram(currentShader->GetProgram()); 
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
 		"diffuseTex"), 0); 
-	/*glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);*/
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
 	glUniform3fv(glGetUniformLocation(currentShader->GetProgram(), 
 		"cameraPos"), 1, (float*)&camera->GetPosition()); 
 	UpdateShaderMatrices(); 
