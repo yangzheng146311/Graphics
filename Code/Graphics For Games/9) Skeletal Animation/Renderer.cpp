@@ -1,7 +1,7 @@
 #include "Renderer.h"
 
 Renderer::Renderer(Window &parent) : OGLRenderer(parent)	{	
-	camera			= new Camera(0,-90.0f,Vector3(0,0,-100));
+	camera			= new Camera(0,0,Vector3(0,0,1000));
 
 #ifdef MD5_USE_HARDWARE_SKINNING
 	currentShader   = new Shader(SHADERDIR"skeletonVertexSimple.glsl", SHADERDIR"TexturedFragment.glsl");
@@ -23,7 +23,7 @@ Renderer::Renderer(Window &parent) : OGLRenderer(parent)	{
 	projMatrix = Matrix4::Perspective(1.0f,10000.0f,(float)width / (float)height, 45.0f);
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 
 	init = true;
 }
@@ -37,7 +37,7 @@ Renderer::~Renderer(void)	{
 
  void Renderer::UpdateScene(float msec)	{
 	camera->UpdateCamera(msec); 
-	viewMatrix		= camera->BuildViewMatrix();
+	viewMatrix = camera->BuildViewMatrix();
 
 	hellNode->Update(msec);
 }
@@ -48,15 +48,17 @@ void Renderer::RenderScene()	{
 	glUseProgram(currentShader->GetProgram());
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 
+	modelMatrix = Matrix4::Translation(Vector3(0, 0, 0));
 	UpdateShaderMatrices();
+	hellNode->Draw(*this);
 
-	for(int y = 0; y < 10; ++y) {
-		for(int x = 0; x < 10; ++x) {
-			modelMatrix = Matrix4::Translation(Vector3(x * 100, 0, y * 100));
-			UpdateShaderMatrices();	
-			hellNode->Draw(*this);
-		}
-	}
+	//for(int y = 0; y < 1; ++y) {
+	//	for(int x = 0; x < 1; ++x) {
+	//		modelMatrix = Matrix4::Translation(Vector3(x * 100, 0, y * 100));
+	//		UpdateShaderMatrices();	
+	//		hellNode->Draw(*this);
+	//	}
+	//}
 
 	glUseProgram(0);
 	SwapBuffers();

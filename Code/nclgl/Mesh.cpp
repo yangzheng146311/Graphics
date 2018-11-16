@@ -189,8 +189,8 @@ void Mesh::Draw() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);  
 
-	//glActiveTexture(GL_TEXTURE1); //New!!! 
-	//glBindTexture(GL_TEXTURE_2D , bumpTexture); //New!!! 
+	glActiveTexture(GL_TEXTURE1); //New!!! 
+	glBindTexture(GL_TEXTURE_2D , bumpTexture); //New!!! 
 
 	glBindVertexArray(arrayObject); 
 	
