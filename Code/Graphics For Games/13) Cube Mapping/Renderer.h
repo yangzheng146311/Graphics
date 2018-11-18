@@ -3,6 +3,7 @@
 #include "../../nclgl/Camera.h"
 #include "../../nclgl/HeightMap.h"
 
+
 class Renderer : public OGLRenderer {
 public:
 	 Renderer(Window & parent);
@@ -25,5 +26,15 @@ public:
 	 Camera * camera;
      GLuint cubeMap;
      float waterRotate;
+	 bool lightOff = true;
+	 bool lightUp = true;
+	 bool lightFront = true;
+	 bool lightRight = true;
+	 float LightOriginRadius;
+	 float LightOriginPosZ;
+	 float LightOriginPosY;
+	 float LightOriginPosX;
+
+	 int dir = 1;
 	
 };

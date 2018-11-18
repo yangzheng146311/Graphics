@@ -1,15 +1,18 @@
 #include "Renderer.h"
+#include"time.h"
 
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	camera = new Camera();
 heightMap = new HeightMap("../../Textures/terrain.raw");
 quad = Mesh::GenerateQuad();
 
-camera->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 500.0f, RAW_WIDTH * HEIGHTMAP_X));
+camera->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 1000.0f, RAW_WIDTH * HEIGHTMAP_X));
 
-light = new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f), 500.0f, (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)), Vector4(0.9f, 0.9f, 1.0f, 1), (RAW_WIDTH * HEIGHTMAP_X) / 2.0f);
-
-
+light = new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f), 500.0f, (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)), Vector4(0.9f, 0.9f, 0.9f, 1), (RAW_WIDTH * HEIGHTMAP_X) / 0.5f);
+LightOriginRadius = light->GetRadius();
+LightOriginPosZ = light->GetPosition().z;
+LightOriginPosY = light->GetPosition().y;
+LightOriginPosX = light->GetPosition().x;
 
 
 
@@ -25,8 +28,12 @@ quad->SetTexture(SOIL_load_OGL_texture("../../Textures/water.tga", SOIL_LOAD_AUT
 heightMap->SetTexture(SOIL_load_OGL_texture("../../Textures/Barren Reds.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 heightMap->SetBumpMap(SOIL_load_OGL_texture("../../Textures/Barren RedsDOT3.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 
-cubeMap = SOIL_load_OGL_cubemap("../../Textures/rusted_west.jpg", "../../Textures/rusted_east.jpg", "../../Textures/rusted_up.jpg", "../../Textures/rusted_down.jpg",
-"../../Textures/rusted_south.jpg", "../../Textures/rusted_north.jpg", SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);
+
+
+cubeMap = SOIL_load_OGL_cubemap("../../Textures/MyTextures/purplenebula_lf.tga", "../../Textures/MyTextures/purplenebula_rt.tga", "../../Textures/MyTextures/purplenebula_up.tga", "../../Textures/MyTextures/purplenebula_dn.tga",
+	"../../Textures/MyTextures/purplenebula_bk.tga", "../../Textures/MyTextures/purplenebula_ft.tga", SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);
+
+
 if (!cubeMap || !quad->GetTexture() || !heightMap->GetTexture() || !heightMap->GetBumpMap()) {
 return;
 }
@@ -56,6 +63,97 @@ Renderer ::~Renderer(void) {
 	
 }
 void Renderer::UpdateScene(float msec) {
+
+
+	//Light Radius Change
+	{
+		float r = light->GetRadius();
+		if (r > LightOriginRadius)
+		{
+
+			lightOff = true;
+		}
+
+		if (r < 0.0f)
+		{
+
+			lightOff = false;
+		}
+
+
+		if (lightOff == true)
+		{
+			r -= 50;
+		}
+		else
+		{
+			r += 50;
+		}
+
+		light->SetRadius(r);
+	}
+
+	//Light Color Change
+	{
+		Vector4 colour = light->GetColour();
+		
+		colour.x -= 0.01f;
+		if (colour.x < 0) colour.x = 1.0f;
+		colour.y -= 0.04f;
+		if (colour.y < 0) colour.y = 1.0f;
+		colour.z -= 0.07f;
+		if (colour.z < 0) colour.z = 1.0f;
+		light->SetColour(colour);
+	}
+	
+	//Light Position Change
+	{
+		Vector3 pos = light->GetPosition();
+		if (pos.x > LightOriginPosX + 2000.0f)
+		{
+
+			lightRight = false;
+		}
+
+		if (pos.x < LightOriginPosX)
+		{
+
+			lightRight = true;
+		}
+
+		if (pos.y > LightOriginPosY + 2000.f)
+		{
+
+			lightUp = false;
+		}
+
+		if (pos.y < LightOriginPosY)
+		{
+
+			lightUp = true;;
+		}
+		if (pos.z > LightOriginPosZ + 2000.0f)
+		{
+
+			lightFront = false;
+		}
+		if (pos.z < LightOriginPosZ)
+		{
+
+			lightFront = true;
+		}
+		if (lightRight == true) pos.x += 10.f;
+		else pos.x -= 10.0f;
+		/*if (lightUp == true) pos.y += 10.f;
+		else pos.y -= 10.0f;*/
+		if (lightFront == true) pos.z += 10.f;
+		else pos.z -= 10.0f;
+
+
+		light->SetPosition(pos);
+	}
+
+	
 	 camera->UpdateCamera(msec);
 	 viewMatrix = camera->BuildViewMatrix();
 	 waterRotate += msec / 1000.0f;
@@ -110,7 +208,7 @@ void Renderer::DrawWater() {
 		 Matrix4::Translation(Vector3(heightX, heightY, heightZ))
 		 * Matrix4::Scale(Vector3(heightX, 1, heightZ))
 		 * Matrix4::Rotation(90, Vector3(1.0f, 0.0f, 0.0f));
-	 Matrix4::Rotation(waterRotate, Vector3(0.0f, 0.0f, 1.0f));
+	
 	 textureMatrix = Matrix4::Scale(Vector3(10.0f, 10.0f, 10.0f)) *
 	 Matrix4::Rotation(waterRotate, Vector3(0.0f, 0.0f, 1.0f));
 	 UpdateShaderMatrices();
