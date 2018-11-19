@@ -35,7 +35,13 @@ protected:
 	float LightOriginPosZ;
 	float LightOriginPosY;
 	float LightOriginPosX;
-
+	double CamOriX= 1985.0f;
+	double CamOriY= 3584.0f;
+	double CamOriZ= 6387.0f;
+	double CamOriPitch = -37.64f;
+	double CamOriYaw = 0.9f;
+	double curYaw;
+	
 	int dir = 1;
 
 };

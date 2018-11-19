@@ -70,12 +70,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CubeRoot.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Tutorial6.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CubeRoot.h" />
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

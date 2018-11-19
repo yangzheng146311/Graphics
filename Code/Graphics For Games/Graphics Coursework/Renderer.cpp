@@ -5,11 +5,18 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	camera = new Camera();
 	heightMap = new HeightMap("../../Textures/lalala.raw");
 	quad = Mesh::GenerateQuad();
-
-	camera->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 1000.0f, RAW_WIDTH * HEIGHTMAP_X));
+	//camera->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 2500.0f, RAW_WIDTH * HEIGHTMAP_X));
+	
+	camera->SetPosition(Vector3(CamOriX, CamOriY,CamOriZ));
+	camera->SetPitch(CamOriPitch);
+	camera->SetYaw(CamOriYaw);
+	
 
 	light = new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f), 500.0f, (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)), Vector4(0.9f, 0.9f, 0.9f, 1), (RAW_WIDTH * HEIGHTMAP_X) / 0.2f);
-	
+	CamOriX= RAW_WIDTH * HEIGHTMAP_X / 2.0f;
+	CamOriY=
+	CamOriZ = RAW_WIDTH * HEIGHTMAP_X;
+	curYaw = 0.0f;
 	LightOriginRadius = light->GetRadius();
 	LightOriginPosZ = light->GetPosition().z;
 	LightOriginPosY = light->GetPosition().y;
@@ -152,17 +159,42 @@ void Renderer::UpdateScene(float msec) {
 		if (lightFront == true) pos.z += 10.f;
 		else pos.z -= 10.0f;
 
-
+		/*curYaw += 1.0f;
+		if (curYaw > 360.0f) curYaw=0.0f;
+		float CamCurX = CamOriZ * sin(curYaw*PI / 180.0f) + CamOriX;
+		float CamCurZ = -CamOriZ * cos(curYaw*PI / 180.0f) + CamOriZ;
+		
+		camera->SetPosition(Vector3(CamCurX, CamOriY, CamCurZ));
+		float nowYaw = CamOriYaw + curYaw;*/
+		
+		
+	
 		light->SetPosition(pos);
 		
 		
 	}
+	
+	//curAngel += 1.0f;
+	//if (curAngel > 360.0f) curAngel = 0.0f;
 
-
+	//curPitch += 0.001f;
+	//if (curPitch > 90.0f) curPitch = 0.0f;
+	//double camX = CamOriX * cos(curAngel*PI/180.0f);
+	//double camZ= CamOriX * sin(curAngel*PI / 180.0f);
+	//double camPitch = CamOriPitch += curPitch;
+	//
+	//
+	//camera->SetPosition(Vector3((float)camX, 1000.0f, (float)camZ));
+	//camera->SetYaw((float)camPitch);
+	
 	camera->UpdateCamera(msec);
 	viewMatrix = camera->BuildViewMatrix();
 	waterRotate += msec / 1000.0f;
-
+	cout <<"pitch:"<< camera->GetPitch() << endl;
+	cout << "yalw:"<<camera->GetYaw() << endl;
+	cout <<"x:"<< camera->GetPosition().x << endl;
+	cout << "y:" << camera->GetPosition().y << endl;
+	cout << "z:" << camera->GetPosition().z << endl;
 }
 
 void Renderer::RenderScene() {
