@@ -4,7 +4,7 @@
 #include <iostream > 
 #include <fstream > 
 #include "../nclgl/Mesh.h" 
-#define RAW_WIDTH 257 
+#define RAW_WIDTH 257
 #define RAW_HEIGHT 257 
 #define HEIGHTMAP_X 16.0f 
 #define HEIGHTMAP_Z 16.0f 

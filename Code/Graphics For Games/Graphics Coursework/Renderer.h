@@ -23,6 +23,7 @@ protected:
 	HeightMap * heightMap;
 	Mesh * quad;
 	Light * light;
+	
 	Camera * camera;
 	GLuint cubeMap;
 	float waterRotate;
