@@ -28,6 +28,7 @@ init = true;
 Renderer::~Renderer(void) {
 delete root;
 CubeRobot::DeleteCube(); //Also important!
+CubeRobot::DeleteSphere(); //Also important!
 
 }
 

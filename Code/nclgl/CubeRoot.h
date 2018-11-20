@@ -13,16 +13,30 @@
 	
 	 static void CreateCube() {
 		  OBJMesh *m = new OBJMesh();
-		  m->LoadOBJMesh("../../Meshes/cube.obj");
-		  cube = m;
+		  m->LoadOBJMesh("../../Meshes/sphere.obj");
+
+		  OBJMesh *m2 = new OBJMesh();
+		  m2->LoadOBJMesh("../../Meshes/cube.obj");
+
+
+		  sphere = m;
+		  cube = m2;
 		 
 	 }
 	 static void DeleteCube() { delete cube; }
+
+
+	 static void DeleteSphere() {
+		 delete sphere;
+	 }
 	
  protected:
 	 static Mesh* cube;
+	 static Mesh* sphere;
 	 SceneNode* head;
 	 SceneNode* leftArm;
 	 SceneNode* rightArm;
+	 SceneNode* leftLeg;
+	 SceneNode* rightLeg;
 	
 };

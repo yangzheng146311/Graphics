@@ -4,7 +4,7 @@
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	CubeRobot::CreateCube(); //Important!
 	camera = new Camera();
-	heightMap = new HeightMap("../../Textures/lalala.raw");
+	heightMap = new HeightMap("../../Textures/terrain.raw");
 	quad = Mesh::GenerateQuad();
 	//camera->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 2500.0f, RAW_WIDTH * HEIGHTMAP_X));
 	
@@ -74,6 +74,7 @@ Renderer ::~Renderer(void) {
 
 	delete root;
 	CubeRobot::DeleteCube(); //Also important!
+	CubeRobot::DeleteSphere(); //Also important!
 
 
 	currentShader = 0;
@@ -236,6 +237,7 @@ void Renderer::DrawHeightmap() {
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
 	modelMatrix.ToIdentity();
+	modelMatrix.SetPositionVector(Vector3(-2000, 0, -2000));
 	textureMatrix.ToIdentity();
 	UpdateShaderMatrices();
 	heightMap->Draw();
@@ -256,11 +258,12 @@ void Renderer::DrawWater() {
 	float heightX = (RAW_WIDTH * HEIGHTMAP_X / 2.0f);
 	float heightY = 256 * HEIGHTMAP_Y / 3.0f;
 	float heightZ = (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f);
+	
 	modelMatrix =
 		Matrix4::Translation(Vector3(heightX, heightY, heightZ))
 		* Matrix4::Scale(Vector3(heightX, 1, heightZ))
 		* Matrix4::Rotation(90, Vector3(1.0f, 0.0f, 0.0f));
-
+	modelMatrix.SetPositionVector(Vector3(0, 100, -100));
 	textureMatrix = Matrix4::Scale(Vector3(10.0f, 10.0f, 10.0f)) *
 		Matrix4::Rotation(waterRotate, Vector3(0.0f, 0.0f, 1.0f));
 	UpdateShaderMatrices();
