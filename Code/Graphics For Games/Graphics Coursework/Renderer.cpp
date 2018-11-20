@@ -25,6 +25,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 
 	root = new SceneNode();
 	root->AddChild(new CubeRobot());
+	
 
 	cubeShader = new Shader("../../Shaders/SceneVertex.glsl", "../../Shaders/SceneFragment.glsl");
 	reflectShader = new Shader("../../Shaders/PerPixelVertex.glsl", "../../Shaders/reflectFragment.glsl");

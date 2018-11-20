@@ -20,6 +20,7 @@ camera->SetPosition(Vector3(0, 30, 175));
 root = new SceneNode();
 root->AddChild(new CubeRobot());
 
+
 glEnable(GL_DEPTH_TEST);
 init = true;
 
