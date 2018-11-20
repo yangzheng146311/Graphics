@@ -40,15 +40,14 @@ void Renderer::UpdateScene(float msec) {
  void Renderer::RenderScene() {
 	 glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	
-		 glUseProgram(currentShader->GetProgram());
+     glUseProgram(currentShader->GetProgram());
 	 UpdateShaderMatrices();
 	
-		 glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
-			 "diffuseTex"), 1);
+	 glUniform1i(glGetUniformLocation(currentShader->GetProgram(),"diffuseTex"), 1);
 	
-		 DrawNode(root);
+	 DrawNode(root);
 	
-		 glUseProgram(0);
+     glUseProgram(0);
 	 SwapBuffers();
 	
 }

@@ -2,6 +2,7 @@
 #include"time.h"
 
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
+	CubeRobot::CreateCube(); //Important!
 	camera = new Camera();
 	heightMap = new HeightMap("../../Textures/lalala.raw");
 	quad = Mesh::GenerateQuad();
@@ -22,13 +23,15 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	LightOriginPosY = light->GetPosition().y;
 	LightOriginPosX = light->GetPosition().x;
 
+	root = new SceneNode();
+	root->AddChild(new CubeRobot());
 
-
+	cubeShader = new Shader("../../Shaders/SceneVertex.glsl", "../../Shaders/SceneFragment.glsl");
 	reflectShader = new Shader("../../Shaders/PerPixelVertex.glsl", "../../Shaders/reflectFragment.glsl");
 	skyboxShader = new Shader("../../Shaders/skyboxVertex.glsl", "../../Shaders/skyboxFragment.glsl");
 	lightShader = new Shader("../../Shaders/PerPixelVertex.glsl", "../../Shaders/PerPixelFragment.glsl");
 
-	if (!reflectShader->LinkProgram() || !lightShader->LinkProgram() || !skyboxShader->LinkProgram()) {
+	if (!cubeShader->LinkProgram()||!reflectShader->LinkProgram()|| !lightShader->LinkProgram() || !skyboxShader->LinkProgram()) {
 		return;
 
 	}
@@ -68,11 +71,15 @@ Renderer ::~Renderer(void) {
 	delete lightShader;
 	delete light;
 
+	delete root;
+	CubeRobot::DeleteCube(); //Also important!
+
+
 	currentShader = 0;
 
 }
 void Renderer::UpdateScene(float msec) {
-
+	
 
 	////Light Radius Change
 	//{
@@ -189,6 +196,9 @@ void Renderer::UpdateScene(float msec) {
 	
 	camera->UpdateCamera(msec);
 	viewMatrix = camera->BuildViewMatrix();
+
+	root->Update(msec);
+
 	waterRotate += msec / 1000.0f;
 	cout <<"pitch:"<< camera->GetPitch() << endl;
 	cout << "yalw:"<<camera->GetYaw() << endl;
@@ -202,6 +212,7 @@ void Renderer::RenderScene() {
 	DrawSkybox();
 	DrawHeightmap();
 	DrawWater();
+	DrawCube();
 	SwapBuffers();
 
 }
@@ -227,6 +238,7 @@ void Renderer::DrawHeightmap() {
 	textureMatrix.ToIdentity();
 	UpdateShaderMatrices();
 	heightMap->Draw();
+	
 	glUseProgram(0);
 
 }
@@ -255,3 +267,38 @@ void Renderer::DrawWater() {
 	glUseProgram(0);
 
 }
+
+
+
+void Renderer::DrawCube()
+{
+	SetCurrentShader(cubeShader);
+	SetShaderLight(*light);
+	glUseProgram(currentShader->GetProgram());
+	UpdateShaderMatrices();
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 1);
+	DrawNode(root);
+	glUseProgram(0);
+}
+void Renderer::DrawNode(SceneNode*n) {
+	
+	if (n->GetMesh()) {
+		Matrix4 transform = n->GetWorldTransform() *
+			Matrix4::Scale(n->GetModelScale());
+		glUniformMatrix4fv(
+			glGetUniformLocation(currentShader->GetProgram(),
+				"modelMatrix"), 1, false, (float*)&transform);
+		glUniform4fv(glGetUniformLocation(currentShader->GetProgram(),
+			"nodeColour"), 1, (float*)&n->GetColour());
+		glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
+			"useTexture"), (int)n->GetMesh()->GetTexture());
+		n->Draw(*this);
+	}
+	for (vector <SceneNode*>::const_iterator
+		i = n->GetChildIteratorStart();
+		i != n->GetChildIteratorEnd(); ++i) {
+		DrawNode(*i);
+	}
+}
+
+

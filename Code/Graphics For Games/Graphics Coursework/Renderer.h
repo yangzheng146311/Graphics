@@ -2,7 +2,8 @@
 #include "../../nclgl/OGLRenderer.h"
 #include "../../nclgl/Camera.h"
 #include "../../nclgl/HeightMap.h"
-
+#include "../../nclgl/SceneNode.h"
+#include "../../nclgl/CubeRoot.h"
 
 class Renderer : public OGLRenderer {
 public:
@@ -17,6 +18,11 @@ protected:
 	void DrawWater();
 	void DrawSkybox();
 
+	void DrawNode(SceneNode*n);
+	void DrawCube();
+	SceneNode* root;
+
+	Shader * cubeShader;
 	Shader * lightShader;
 	Shader * reflectShader;
 	Shader * skyboxShader;
