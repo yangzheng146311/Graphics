@@ -41,16 +41,20 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	sceneShader = new Shader("../../Shaders/shadowscenevert.glsl", "../../Shaders/shadowscenefrag.glsl");
 	shadowShader = new Shader("../../Shaders/shadowVert.glsl", "../../Shaders/shadowFrag.glsl");
 	textShader= new Shader(SHADERDIR"TexturedVertex.glsl", SHADERDIR"TexturedFragment.glsl");
+	particleShader = new Shader("../../Shaders/vertex.glsl",
+		"../../Shaders/fragment.glsl",
+		"../../Shaders/geometry.glsl");
 
 
 	if (!cubeShader->LinkProgram()||!reflectShader->LinkProgram()|| !lightShader->LinkProgram() ||
-		!skyboxShader->LinkProgram()||!sceneShader->LinkProgram()||!shadowShader->LinkProgram() || !textShader->LinkProgram()) {
+		!skyboxShader->LinkProgram()||!sceneShader->LinkProgram()||!shadowShader->LinkProgram() || 
+		!textShader->LinkProgram()||!particleShader->LinkProgram()) {
 		return;
 
 	}
 
 	basicFont = new Font(SOIL_load_OGL_texture(TEXTUREDIR"tahoma.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT), 16, 16);
-
+	emitter = new ParticleEmitter();
 
 	glGenTextures(1, &shadowTex);
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
@@ -103,7 +107,7 @@ Renderer ::~Renderer(void) {
 	delete camera;
 	delete heightMap;
 	delete quad;
-	
+	delete emitter;
 	delete reflectShader;
 	delete skyboxShader;
 	delete lightShader;
@@ -179,14 +183,14 @@ void Renderer::UpdateScene(float msec) {
 	//Light Position Change
 	{
 		Vector3 pos = light->GetPosition();
-		
-		if (pos.x > LightOriginPosX  )
+
+		if (pos.x > LightOriginPosX)
 		{
 
 			lightRight = false;
 		}
 
-		if (pos.x < LightOriginPosX-4000.0f)
+		if (pos.x < LightOriginPosX - 4000.0f)
 		{
 
 			lightRight = true;
@@ -203,7 +207,7 @@ void Renderer::UpdateScene(float msec) {
 
 			lightUp = true;;
 		}
-		if (pos.z > LightOriginPosZ )
+		if (pos.z > LightOriginPosZ)
 		{
 
 			lightFront = false;
@@ -219,32 +223,25 @@ void Renderer::UpdateScene(float msec) {
 		else pos.y -= 10.0f;*/
 		if (lightFront == true) pos.z += 10.f;
 		else pos.z -= 10.0f;
+		//light->SetPosition(pos);
+	}
+		//if (camMove)
+		//{
+		//	curYaw += 1.0f*dir;
+		//	if (curYaw > 720.0f || curYaw < 0.0f)
+		//	{
 
-		if (camMove)
-		{
-			curYaw += 1.0f*dir;
-			if (curYaw > 720.0f || curYaw < 0.0f)
-			{
-
-				dir *= -1;
-			}
-		}
-		//float CamCurX = CamOriZ * sin(curYaw*PI / 180.0f) + CamOriX;
-		//float CamCurZ = -CamOriZ * cos(curYaw*PI / 180.0f) + CamOriZ;
-		
-		camera->SetPosition(Vector3(CamOriX, CamOriY, CamOriZ));
-		float nowYaw = CamOriYaw + curYaw;
-		camera->SetYaw(nowYaw*0.1f);
+		//		dir *= -1;
+		//	}
+		//}
+		////float CamCurX = CamOriZ * sin(curYaw*PI / 180.0f) + CamOriX;
+		////float CamCurZ = -CamOriZ * cos(curYaw*PI / 180.0f) + CamOriZ;
+		//
+		//camera->SetPosition(Vector3(CamOriX, CamOriY, CamOriZ));
+		//float nowYaw = CamOriYaw + curYaw;
+		//camera->SetYaw(nowYaw*0.1f);
 		//camera->SetPitch(nowYaw*-0.1f);
 
-		
-		
-	
-		//light->SetPosition(pos);
-		
-		
-	}
-	
 	/*curAngel += 1.0f;
 	if (curAngel > 360.0f) curAngel = 0.0f;
 
@@ -258,6 +255,7 @@ void Renderer::UpdateScene(float msec) {
 	/*camera->SetPosition(Vector3((float)camX, 1000.0f, (float)camZ));
 	camera->SetYaw((float)camPitch);
 	*/
+	emitter->Update(msec);
 	camera->UpdateCamera(msec);
 
 	viewMatrix = camera->BuildViewMatrix();
@@ -275,15 +273,6 @@ void Renderer::UpdateScene(float msec) {
 
 void Renderer::RenderScene() {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	DrawSkybox();
-	DrawHeightmap();
-	DrawFPS();
-
-	DrawWater();
-	DrawCube();
-	DrawShadowScene(); // First render pass ...
-	DrawCombinedScene(); // Second render pass ...
-	
 	
 	SwapBuffers();
 
@@ -419,10 +408,35 @@ void Renderer::DrawFPS()
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	//Render function to encapsulate our font rendering!
 	
-	DrawText("FPS:"+ FloatToString(1000.0f/curMsec), Vector3(0, 0, 0), 16.0f);
+	DrawText("FPS:"+FloatToString(1000.0f/curMsec), Vector3(0, 0, 0), 16.0f);
 	DrawText("hahaha", Vector3(-54,11500,49), 64.0f, true);
 
 	glUseProgram(0);	//That's everything!
+}
+
+void Renderer::DrawParticle()
+{
+	glClearColor(0, 0, 0, 1);
+	
+	SetCurrentShader(particleShader);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
+	SetShaderParticleSize(emitter->GetParticleSize());
+	
+	emitter->SetParticleSize(8.0f);
+	emitter->SetParticleVariance(1.0f);
+	emitter->SetLaunchParticles(128.0f);
+	emitter->SetParticleLifetime(2000.0f);
+	emitter->SetParticleSpeed(1.0f);
+	
+	UpdateShaderMatrices();
+	emitter->Draw();
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glUseProgram(0);
+}
+
+
+void	Renderer::SetShaderParticleSize(float f) {
+	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "particleSize"), f);
 }
 
 string Renderer::FloatToString(float msec)
@@ -486,3 +500,24 @@ void Renderer::DrawText(const std::string &text, const Vector3 &position, const 
 }
 
 
+void Renderer::DrawScene_A()
+{
+	DrawSkybox();
+	DrawHeightmap();
+	DrawFPS();
+	DrawWater();
+	DrawCube();
+	DrawShadowScene(); // First render pass ...
+	DrawCombinedScene(); // Second render pass ...
+	DrawParticle();
+}
+
+void Renderer::DrawScene_B()
+{
+	
+}
+
+void Renderer::DrawScene_C()
+{
+	
+}

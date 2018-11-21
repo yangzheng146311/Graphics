@@ -6,8 +6,10 @@
 #include "../../nclgl/CubeRoot.h"
 #include"../../nclgl/MD5Mesh.h"
 #include"../../nclgl/MD5Node.h"
+#include "ParticleEmitter.h"	//A new class!
 #include <stdio.h> 
 #include "textmesh.h"
+
 #define SHADOWSIZE 2048//New!
 
 class Renderer : public OGLRenderer {
@@ -23,19 +25,19 @@ protected:
 	void DrawHeightmap();
 	void DrawWater();
 	void DrawSkybox();
-
-
-
 	void DrawNode(SceneNode*n);
 	void DrawCube();
-
-
 	void DrawMesh(); // New !
 	void DrawFloor(); // New !
 	void DrawShadowScene(); // New !
 	void DrawCombinedScene(); // New !
-
 	void DrawFPS();
+	void DrawParticle();
+	void DrawScene_A();
+	void DrawScene_B();
+	void DrawScene_C();
+
+	void	SetShaderParticleSize(float f);	//And a new setter
 	
 	string FloatToString(float msec);
 	void	DrawText(const std::string &text, const Vector3 &position, const float size = 10.0f, const bool perspective = false);
@@ -49,6 +51,8 @@ protected:
 	Shader * skyboxShader;
 	Shader * sceneShader;
 	Shader * shadowShader;
+	Shader * particleShader;
+
 	HeightMap * heightMap;
 	Mesh * quad;
 
@@ -63,6 +67,7 @@ protected:
 	GLuint shadowTex;
 	GLuint shadowFBO;
 
+	ParticleEmitter*	emitter;	//A single particle emitter
 
 
 
@@ -72,7 +77,7 @@ protected:
 	bool lightUp = true;
 	bool lightFront = true;
 	bool lightRight = true;
-	bool camMove = true;
+	bool camMove = false;
 	float LightOriginRadius;
 	float LightOriginPosZ;
 	float LightOriginPosY;
