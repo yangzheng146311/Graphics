@@ -127,7 +127,13 @@ Renderer ::~Renderer(void) {
 }
 
 void Renderer::UpdateScene(float msec) {
-	
+	if (Window::GetKeyboard()->KeyDown(KEYBOARD_SPACE))
+	{
+		if (camMove == true)
+			camMove = false;
+		else
+			camMove = true;
+	}
 	curMsec = msec;
 	////Light Radius Change
 	//{
@@ -214,14 +220,23 @@ void Renderer::UpdateScene(float msec) {
 		if (lightFront == true) pos.z += 10.f;
 		else pos.z -= 10.0f;
 
-		/*curYaw += 0.1f;
-		if (curYaw > 360.0f) curYaw=0.0f;
-		float CamCurX = CamOriZ * sin(curYaw*PI / 180.0f) + CamOriX;
-		float CamCurZ = -CamOriZ * cos(curYaw*PI / 180.0f) + CamOriZ;
+		if (camMove)
+		{
+			curYaw += 1.0f*dir;
+			if (curYaw > 720.0f || curYaw < 0.0f)
+			{
+
+				dir *= -1;
+			}
+		}
+		//float CamCurX = CamOriZ * sin(curYaw*PI / 180.0f) + CamOriX;
+		//float CamCurZ = -CamOriZ * cos(curYaw*PI / 180.0f) + CamOriZ;
 		
-		camera->SetPosition(Vector3(CamCurX, CamOriY, CamCurZ));
+		camera->SetPosition(Vector3(CamOriX, CamOriY, CamOriZ));
 		float nowYaw = CamOriYaw + curYaw;
-		camera->SetYaw(nowYaw);*/
+		camera->SetYaw(nowYaw*0.1f);
+		//camera->SetPitch(nowYaw*-0.1f);
+
 		
 		
 	
@@ -421,7 +436,7 @@ string Renderer::FrameRateToString(float msec)
 
 void Renderer::DrawMesh() {
 	modelMatrix.ToIdentity();
-	modelMatrix.SetPositionVector(Vector3(500, 220, 800));
+	modelMatrix.SetPositionVector(Vector3(500, 110, 800));
 	modelMatrix.SetScalingVector(Vector3(2, 2, 2));
 	
 	Matrix4 tempMatrix = textureMatrix * modelMatrix;
@@ -433,7 +448,7 @@ void Renderer::DrawMesh() {
 void Renderer::DrawFloor() {
 	modelMatrix.ToIdentity();
 	modelMatrix = Matrix4::Rotation(90, Vector3(1, 0, 0))*Matrix4::Scale(Vector3(650, 650, 1));
-	modelMatrix.SetPositionVector(Vector3(-100, 220, 500));
+	modelMatrix.SetPositionVector(Vector3(-100, 110, 500));
 	//modelMatrix.SetScalingVector(Vector3(1000, 1000, 1000));
 	
 	Matrix4 tempMatrix = textureMatrix * modelMatrix;

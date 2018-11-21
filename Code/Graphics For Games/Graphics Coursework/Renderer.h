@@ -72,15 +72,16 @@ protected:
 	bool lightUp = true;
 	bool lightFront = true;
 	bool lightRight = true;
+	bool camMove = true;
 	float LightOriginRadius;
 	float LightOriginPosZ;
 	float LightOriginPosY;
 	float LightOriginPosX;
-	double CamOriX= 812.0f;
-	double CamOriY= 582.0f;
-	double CamOriZ= 363.0f;
-	double CamOriPitch = -13.4f;
-	double CamOriYaw =67.0f;
+	double CamOriX= 2183.0f;
+	double CamOriY= 1335.0f;
+	double CamOriZ= 2103.0f;
+	double CamOriPitch = -24.0f;
+	double CamOriYaw =49.5f;
 	double curYaw;
 	float curMsec;
 	
