@@ -37,7 +37,7 @@ protected:
 
 	void DrawFPS();
 	
-	string FrameRateToString(float msec);
+	string FloatToString(float msec);
 	void	DrawText(const std::string &text, const Vector3 &position, const float size = 10.0f, const bool perspective = false);
 
 	SceneNode* root;

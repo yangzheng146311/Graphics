@@ -419,13 +419,13 @@ void Renderer::DrawFPS()
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	//Render function to encapsulate our font rendering!
 	
-	DrawText("FPS:"+FrameRateToString(1000.0f/curMsec), Vector3(0, 0, 0), 16.0f);
+	DrawText("FPS:"+ FloatToString(1000.0f/curMsec), Vector3(0, 0, 0), 16.0f);
 	DrawText("hahaha", Vector3(-54,11500,49), 64.0f, true);
 
 	glUseProgram(0);	//That's everything!
 }
 
-string Renderer::FrameRateToString(float msec)
+string Renderer::FloatToString(float msec)
 {
 	char buf[10];
 	
