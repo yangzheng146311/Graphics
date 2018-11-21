@@ -34,6 +34,7 @@ Renderer::Renderer(Window &parent) : OGLRenderer(parent)	{
 
 	//Again there's no fancy shader stuff, so it's just tutorial 3 again...
 	currentShader = new Shader(SHADERDIR"TexturedVertex.glsl", SHADERDIR"TexturedFragment.glsl");
+
 	
 	if(!currentShader->LinkProgram()) {
 		return;

@@ -39,11 +39,17 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	lightShader = new Shader("../../Shaders/PerPixelVertex.glsl", "../../Shaders/PerPixelFragment.glsl");
 	sceneShader = new Shader("../../Shaders/shadowscenevert.glsl", "../../Shaders/shadowscenefrag.glsl");
 	shadowShader = new Shader("../../Shaders/shadowVert.glsl", "../../Shaders/shadowFrag.glsl");
+	textShader= new Shader(SHADERDIR"TexturedVertex.glsl", SHADERDIR"TexturedFragment.glsl");
 
-	if (!cubeShader->LinkProgram()||!reflectShader->LinkProgram()|| !lightShader->LinkProgram() || !skyboxShader->LinkProgram()||!sceneShader->LinkProgram()||!shadowShader->LinkProgram()) {
+	if (!cubeShader->LinkProgram()||!reflectShader->LinkProgram()|| !lightShader->LinkProgram() ||
+		!skyboxShader->LinkProgram()||!sceneShader->LinkProgram()||!shadowShader->LinkProgram() || !textShader->LinkProgram()) {
 		return;
 
 	}
+
+	basicFont = new Font(SOIL_load_OGL_texture(TEXTUREDIR"tahoma.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_COMPRESS_TO_DXT), 16, 16);
+
+
 	glGenTextures(1, &shadowTex);
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -60,9 +66,11 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	glDrawBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	quad->SetTexture(SOIL_load_OGL_texture("../../Textures/water.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-	heightMap->SetTexture(SOIL_load_OGL_texture("../../Textures/Barren Reds.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-	heightMap->SetBumpMap(SOIL_load_OGL_texture("../../Textures/Barren RedsDOT3.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	quad->SetTexture(SOIL_load_OGL_texture("../../MyTextures/water1.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	/*heightMap->SetTexture(SOIL_load_OGL_texture("../../Textures/Barren Reds.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	heightMap->SetBumpMap(SOIL_load_OGL_texture("../../Textures/Barren RedsDOT3.JPG", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));*/
+	heightMap->SetTexture(SOIL_load_OGL_texture("../../MyTextures/barren.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	heightMap->SetBumpMap(SOIL_load_OGL_texture("../../MyTextures/barren_normal.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 
 
 
@@ -83,7 +91,8 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)width / (float)height, 45.0f);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }
 
@@ -102,6 +111,7 @@ Renderer ::~Renderer(void) {
 	delete root;
 	delete hellData;
 	delete hellNode;
+	delete basicFont;
 	
 	currentShader = NULL;
 	CubeRobot::DeleteCube(); //Also important!
@@ -199,14 +209,14 @@ void Renderer::UpdateScene(float msec) {
 		if (lightFront == true) pos.z += 10.f;
 		else pos.z -= 10.0f;
 
-		curYaw += 0.1f;
+		/*curYaw += 0.1f;
 		if (curYaw > 360.0f) curYaw=0.0f;
 		float CamCurX = CamOriZ * sin(curYaw*PI / 180.0f) + CamOriX;
 		float CamCurZ = -CamOriZ * cos(curYaw*PI / 180.0f) + CamOriZ;
 		
 		camera->SetPosition(Vector3(CamCurX, CamOriY, CamCurZ));
 		float nowYaw = CamOriYaw + curYaw;
-		camera->SetYaw(nowYaw);
+		camera->SetYaw(nowYaw);*/
 		
 		
 	
@@ -240,16 +250,22 @@ void Renderer::UpdateScene(float msec) {
 	cout <<"x:"<< camera->GetPosition().x << endl;
 	cout << "y:" << camera->GetPosition().y << endl;
 	cout << "z:" << camera->GetPosition().z << endl;
+	cout<<msec<<endl;
 }
 
 void Renderer::RenderScene() {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	DrawSkybox();
-	DrawShadowScene(); // First render pass ...
-	DrawCombinedScene(); // Second render pass ...
-	DrawHeightmap();
-	DrawWater();
-	DrawCube();
+	DrawFPS();
+	//
+     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//DrawSkybox();
+	//
+	//DrawHeightmap();
+	//DrawWater();
+	//DrawCube();
+	//DrawShadowScene(); // First render pass ...
+	//DrawCombinedScene(); // Second render pass ...
+	
 	
 	SwapBuffers();
 
@@ -373,6 +389,19 @@ void Renderer::DrawCombinedScene() {
 	glUseProgram(0);
 }
 
+void Renderer::DrawFPS()
+{
+	SetCurrentShader(textShader);
+	//And turn on texture unit 0
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
+	//Render function to encapsulate our font rendering!
+	
+	DrawText("This is orthographic text!", Vector3(0, 0, 0), 16.0f);
+	DrawText("This is perspective text!!!!", Vector3(-54,500,49), 64.0f, true);
+
+	glUseProgram(0);	//That's everything!
+}
+
 void Renderer::DrawMesh() {
 	modelMatrix.ToIdentity();
 	modelMatrix.SetPositionVector(Vector3(400, 250, 0));
@@ -382,4 +411,29 @@ void Renderer::DrawMesh() {
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
 	hellNode->Draw(*this);
+}
+void Renderer::DrawText(const std::string &text, const Vector3 &position, const float size, const bool perspective) {
+		//Create a new temporary TextMesh, using our line of text and our font
+	TextMesh* mesh = new TextMesh(text,*basicFont);
+
+	//This just does simple matrix setup to render in either perspective or
+	//orthographic mode, there's nothing here that's particularly tricky.
+	if(perspective) {
+		modelMatrix = Matrix4::Translation(position) * Matrix4::Scale(Vector3(size,size,1));
+		viewMatrix = camera->BuildViewMatrix();
+		projMatrix = Matrix4::Perspective(1.0f,10000.0f,(float)width / (float)height, 45.0f);
+	}
+	else{	
+		//In ortho mode, we subtract the y from the height, so that a height of 0
+		//is at the top left of the screen, which is more intuitive
+		//(for me anyway...)
+		modelMatrix = Matrix4::Translation(Vector3(position.x,height-position.y, position.z)) * Matrix4::Scale(Vector3(size,size,1));
+		viewMatrix.ToIdentity();
+		projMatrix = Matrix4::Orthographic(-1.0f,1.0f,(float)width, 0.0f,(float)height, 0.0f);
+	}
+	//Either way, we update the matrices, and draw the mesh
+	UpdateShaderMatrices();
+	mesh->Draw();
+
+	delete mesh; //Once it's drawn, we don't need it anymore!
 }

@@ -6,6 +6,7 @@
 #include "../../nclgl/CubeRoot.h"
 #include"../../nclgl/MD5Mesh.h"
 #include"../../nclgl/MD5Node.h"
+#include "textmesh.h"
 #define SHADOWSIZE 2048//New!
 class Renderer : public OGLRenderer {
 public:
@@ -31,8 +32,13 @@ protected:
 	void DrawShadowScene(); // New !
 	void DrawCombinedScene(); // New !
 
+	void DrawFPS();
+
+	void	DrawText(const std::string &text, const Vector3 &position, const float size = 10.0f, const bool perspective = false);
+
 	SceneNode* root;
 
+	Shader * textShader;
 	Shader * cubeShader;
 	Shader * lightShader;
 	Shader * reflectShader;
@@ -42,7 +48,8 @@ protected:
 	HeightMap * heightMap;
 	Mesh * quad;
 	Light * light;
-	
+	Font*	basicFont;	//A font! a basic one...
+
 	MD5FileData * hellData;
 	MD5Node * hellNode;
 	Camera * camera;

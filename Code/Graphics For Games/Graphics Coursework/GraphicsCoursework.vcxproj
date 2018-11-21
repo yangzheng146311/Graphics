@@ -12,10 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="TextMesh.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="TextMesh.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{909A2CFC-6E55-4776-8B60-93B44103A9CF}</ProjectGuid>
