@@ -6,8 +6,10 @@
 #include "../../nclgl/CubeRoot.h"
 #include"../../nclgl/MD5Mesh.h"
 #include"../../nclgl/MD5Node.h"
+#include <stdio.h> 
 #include "textmesh.h"
 #define SHADOWSIZE 2048//New!
+
 class Renderer : public OGLRenderer {
 public:
 	Renderer(Window & parent);
@@ -29,11 +31,13 @@ protected:
 
 
 	void DrawMesh(); // New !
+	void DrawFloor(); // New !
 	void DrawShadowScene(); // New !
 	void DrawCombinedScene(); // New !
 
 	void DrawFPS();
-
+	
+	string FrameRateToString(float msec);
 	void	DrawText(const std::string &text, const Vector3 &position, const float size = 10.0f, const bool perspective = false);
 
 	SceneNode* root;
@@ -47,6 +51,8 @@ protected:
 	Shader * shadowShader;
 	HeightMap * heightMap;
 	Mesh * quad;
+
+	Mesh * floor;
 	Light * light;
 	Font*	basicFont;	//A font! a basic one...
 
@@ -56,6 +62,11 @@ protected:
 	GLuint cubeMap;
 	GLuint shadowTex;
 	GLuint shadowFBO;
+
+
+
+
+
 	float waterRotate;
 	bool lightOff = true;
 	bool lightUp = true;
@@ -71,6 +82,7 @@ protected:
 	double CamOriPitch = -13.4f;
 	double CamOriYaw =67.0f;
 	double curYaw;
+	float curMsec;
 	
 	int dir = 1;
 
