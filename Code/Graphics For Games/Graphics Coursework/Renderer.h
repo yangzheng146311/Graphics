@@ -78,6 +78,8 @@ protected:
 	bool lightFront = true;
 	bool lightRight = true;
 	bool camMove = false;
+	bool aniWalk = true;
+	
 	float LightOriginRadius;
 	float LightOriginPosZ;
 	float LightOriginPosY;
@@ -89,6 +91,11 @@ protected:
 	double CamOriYaw =49.5f;
 	double curYaw;
 	float curMsec;
+
+	float hellNightX=400;
+	float hellNightY=110;
+	float hellNightZ=600;
+	float timec = 0.0f;
 	
 	int dir = 1;
 

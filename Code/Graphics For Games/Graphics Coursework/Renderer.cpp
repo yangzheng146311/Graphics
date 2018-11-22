@@ -9,7 +9,9 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	hellData = new MD5FileData("../../Meshes/hellknight.md5mesh");
 	hellNode = new MD5Node(*hellData);
 	hellData->AddAnim("../../Meshes/idle2.md5anim");
+	hellData->AddAnim("../../Meshes/walk7.md5anim");
 	hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+	
 
 	quad = Mesh::GenerateQuad();
 	//camera->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 2500.0f, RAW_WIDTH * HEIGHTMAP_X));
@@ -73,15 +75,33 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	floor = Mesh::GenerateQuad();
-	floor->SetTexture(SOIL_load_OGL_texture("../../Textures/brick.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-	floor->SetBumpMap(SOIL_load_OGL_texture("../../Textures/brickDOT3.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-	floor->SetBumpMap(SOIL_load_OGL_texture("../../Textures/brickDOT3.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	/*floor->SetTexture(SOIL_load_OGL_texture("../../Textures/brick.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	floor->SetBumpMap(SOIL_load_OGL_texture("../../Textures/brickDOT3.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));*/
+
+	floor->SetTexture(SOIL_load_OGL_texture("../../MyTextures/stoneFloor512.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	floor->SetBumpMap(SOIL_load_OGL_texture("../../MyTextures/stoneFloorN512.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	
 
 	quad->SetTexture(SOIL_load_OGL_texture("../../MyTextures/water1.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	heightMap->SetTexture(SOIL_load_OGL_texture("../../MyTextures/barren.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	heightMap->SetBumpMap(SOIL_load_OGL_texture("../../MyTextures/barren_normal.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-	cubeMap = SOIL_load_OGL_cubemap("../../Textures/MyTextures/purplenebula_lf.tga", "../../Textures/MyTextures/purplenebula_rt.tga", "../../Textures/MyTextures/purplenebula_up.tga", "../../Textures/MyTextures/purplenebula_dn.tga",
-		"../../Textures/MyTextures/purplenebula_bk.tga", "../../Textures/MyTextures/purplenebula_ft.tga", SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);
+	/*cubeMap = SOIL_load_OGL_cubemap("
+	../../MyTextures/purplenebula_lf.tga",
+	"../../MyTextures/purplenebula_rt.tga",
+	"../../MyTextures/purplenebula_up.tga", 
+	"../../MyTextures/purplenebula_dn.tga",
+	"../../MyTextures/purplenebula_bk.tga",
+	"../../MyTextures/purplenebula_ft.tga", SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);*/
+
+	cubeMap = SOIL_load_OGL_cubemap(
+		"../../MyTextures/flatrock_lf.tga", 
+		"../../MyTextures/flatrock_rt.tga",
+		"../../MyTextures/flatrock_up.tga",
+		"../../MyTextures/flatrock_dn.tga",
+		"../../MyTextures/flatrock_bk.tga", 
+		"../../MyTextures/flatrock_ft.tga", SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);
+
+
 	if (!cubeMap || !quad->GetTexture() || !heightMap->GetTexture() || !heightMap->GetBumpMap()) {
 		return;
 	}
@@ -131,6 +151,27 @@ Renderer ::~Renderer(void) {
 }
 
 void Renderer::UpdateScene(float msec) {
+	
+	cout << timec << endl;
+	timec += 1;
+	if(timec==200) hellNode->PlayAnim("../../Meshes/walk7.md5anim");
+	if (timec > 200)
+	{
+		if (hellNightX > -200)
+		{
+			hellNightX -= 8;
+		}
+
+		else
+			if (aniWalk == true)
+			{
+				aniWalk = false;
+				hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+
+			}
+	}
+
+
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_SPACE))
 	{
 		if (camMove == true)
@@ -169,7 +210,7 @@ void Renderer::UpdateScene(float msec) {
 
 	////Light Color Change
 	{
-		Vector4 colour = light->GetColour();
+		/*Vector4 colour = light->GetColour();
 
 		colour.x -= 0.001f;
 		if (colour.x < 0) colour.x = 1.0f;
@@ -177,7 +218,7 @@ void Renderer::UpdateScene(float msec) {
 		if (colour.y < 0) colour.y = 1.0f;
 		colour.z -= 0.007f;
 		if (colour.z < 0) colour.z = 1.0f;
-		light->SetColour(colour);
+		light->SetColour(colour);*/
 	}
 
 	//Light Position Change
@@ -273,7 +314,7 @@ void Renderer::UpdateScene(float msec) {
 
 void Renderer::RenderScene() {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	
+	DrawScene_B ();
 	SwapBuffers();
 
 }
@@ -428,7 +469,14 @@ void Renderer::DrawParticle()
 	emitter->SetParticleLifetime(2000.0f);
 	emitter->SetParticleSpeed(1.0f);
 	
+
+	modelMatrix.ToIdentity();
+	Matrix4 tempMatrix = textureMatrix * modelMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
+	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
 	UpdateShaderMatrices();
+
+
 	emitter->Draw();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glUseProgram(0);
@@ -450,12 +498,21 @@ string Renderer::FloatToString(float msec)
 
 void Renderer::DrawMesh() {
 	modelMatrix.ToIdentity();
-	modelMatrix.SetPositionVector(Vector3(500, 110, 800));
+	modelMatrix.SetPositionVector(Vector3(hellNightX, 110, 600));
 	modelMatrix.SetScalingVector(Vector3(2, 2, 2));
+	
 	
 	Matrix4 tempMatrix = textureMatrix * modelMatrix;
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
+
+    /*if (aniWalk == true)
+		{
+			hellNode->PlayAnim("../../Meshes/walk7.md5anim");
+			
+		}
+	else
+		hellNode->PlayAnim("../../Meshes/idle2.md5anim");*/
 	hellNode->Draw(*this);
 }
 
@@ -514,7 +571,15 @@ void Renderer::DrawScene_A()
 
 void Renderer::DrawScene_B()
 {
-	
+	camera->SetPosition(Vector3(-429,499, 1947));
+	camera->SetPitch(4);
+	camera->SetYaw(352);
+
+	DrawSkybox();
+	DrawFPS();
+	DrawShadowScene(); // First render pass ...
+	DrawCombinedScene(); // Second render pass ...
+	//DrawParticle();
 }
 
 void Renderer::DrawScene_C()
