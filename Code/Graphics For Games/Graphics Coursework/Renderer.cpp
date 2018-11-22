@@ -10,19 +10,22 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	hellNode = new MD5Node(*hellData);
 	hellData->AddAnim("../../Meshes/idle2.md5anim");
 	hellData->AddAnim("../../Meshes/walk7.md5anim");
+	hellData->AddAnim("../../Meshes/attack2.md5anim");
 	hellNode->PlayAnim("../../Meshes/idle2.md5anim");
 	
-
 	quad = Mesh::GenerateQuad();
 	//camera->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 2500.0f, RAW_WIDTH * HEIGHTMAP_X));
 
 
+	/*camera->SetPosition(Vector3(-429, 499, 1947));
+	camera->SetPitch(4);
+	camera->SetYaw(352);*/
+
 	camera->SetPosition(Vector3(CamOriX, CamOriY,CamOriZ));
 	camera->SetPitch(CamOriPitch);
 	camera->SetYaw(CamOriYaw);
-	
 
-	light = new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f-1000.0f), 500.0f, (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f -1000.f)), Vector4(1.0f, 1.0f, 1.0f, 1), (RAW_WIDTH * HEIGHTMAP_X) / 0.2f);
+	light = new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f-1000.0f), 500.0f, (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)), Vector4(1.0f, 1.0f, 1.0f, 1), (RAW_WIDTH * HEIGHTMAP_X) / 0.2f);
 	CamOriX = camera->GetPosition().x;
 	CamOriY = camera->GetPosition().y;
 	CamOriZ = camera->GetPosition().z;
@@ -34,8 +37,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 
 	root = new SceneNode();
 	root->AddChild(new CubeRobot());
-	
-
+	hellShader = new Shader(SHADERDIR"TexturedVertex.glsl", SHADERDIR"TexturedFragment.glsl");
 	cubeShader = new Shader("../../Shaders/SceneVertex.glsl", "../../Shaders/SceneFragment.glsl");
 	reflectShader = new Shader("../../Shaders/PerPixelVertex.glsl", "../../Shaders/reflectFragment.glsl");
 	skyboxShader = new Shader("../../Shaders/skyboxVertex.glsl", "../../Shaders/skyboxFragment.glsl");
@@ -78,31 +80,23 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	/*floor->SetTexture(SOIL_load_OGL_texture("../../Textures/brick.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	floor->SetBumpMap(SOIL_load_OGL_texture("../../Textures/brickDOT3.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));*/
 
-	floor->SetTexture(SOIL_load_OGL_texture("../../MyTextures/stoneFloor512.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-	floor->SetBumpMap(SOIL_load_OGL_texture("../../MyTextures/stoneFloorN512.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	floor->SetTexture(SOIL_load_OGL_texture("../../MyTextures/concrete.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	floor->SetBumpMap(SOIL_load_OGL_texture("../../MyTextures/concreteN.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	
-
+	
 	quad->SetTexture(SOIL_load_OGL_texture("../../MyTextures/water1.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	heightMap->SetTexture(SOIL_load_OGL_texture("../../MyTextures/barren.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	heightMap->SetBumpMap(SOIL_load_OGL_texture("../../MyTextures/barren_normal.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-	/*cubeMap = SOIL_load_OGL_cubemap("
-	../../MyTextures/purplenebula_lf.tga",
-	"../../MyTextures/purplenebula_rt.tga",
-	"../../MyTextures/purplenebula_up.tga", 
-	"../../MyTextures/purplenebula_dn.tga",
-	"../../MyTextures/purplenebula_bk.tga",
-	"../../MyTextures/purplenebula_ft.tga", SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);*/
-
-	cubeMap = SOIL_load_OGL_cubemap(
-		"../../MyTextures/flatrock_lf.tga", 
-		"../../MyTextures/flatrock_rt.tga",
-		"../../MyTextures/flatrock_up.tga",
-		"../../MyTextures/flatrock_dn.tga",
-		"../../MyTextures/flatrock_bk.tga", 
-		"../../MyTextures/flatrock_ft.tga", SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);
+	
+	cubeMap = SOIL_load_OGL_cubemap("../../MyTextures/purplenebula_lf.tga",
+		"../../MyTextures/purplenebula_rt.tga",
+		"../../MyTextures/purplenebula_up.tga",
+		"../../MyTextures/purplenebula_dn.tga",
+		"../../MyTextures/purplenebula_bk.tga",
+		"../../MyTextures/purplenebula_ft.tga", SOIL_LOAD_RGB, SOIL_CREATE_NEW_ID, 0);
 
 
-	if (!cubeMap || !quad->GetTexture() || !heightMap->GetTexture() || !heightMap->GetBumpMap()) {
+	if (!cubeMap || !quad->GetTexture() ||!heightMap->GetTexture() || !heightMap->GetBumpMap()) {
 		return;
 	}
 
@@ -110,7 +104,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	SetTextureRepeating(heightMap->GetTexture(), true);
 	SetTextureRepeating(heightMap->GetBumpMap(), true);
 
-	init = true;
+
 	waterRotate = 0.0f;
 	projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)width / (float)height, 45.0f);
 	glEnable(GL_DEPTH_TEST);
@@ -118,6 +112,8 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	init = true;
+	
 }
 
 Renderer ::~Renderer(void) {
@@ -152,24 +148,61 @@ Renderer ::~Renderer(void) {
 
 void Renderer::UpdateScene(float msec) {
 	
-	cout << timec << endl;
+	std::cout << timec << endl;
+
+	
 	timec += 1;
-	if(timec==200) hellNode->PlayAnim("../../Meshes/walk7.md5anim");
-	if (timec > 200)
+
+
+	if (curScene == 1)
 	{
-		if (hellNightX > -200)
+		if (timec == 200) hellNode->PlayAnim("../../Meshes/walk7.md5anim");
+		if (timec > 200)
 		{
-			hellNightX -= 8;
+			if (hellNightX > -200)
+			{
+				hellNightX -= 8;
+			}
+
+			else
+				if (aniWalk == true)
+				{
+					aniWalk = false;
+					hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+
+				}
 		}
 
-		else
-			if (aniWalk == true)
+		if (timec > 300)
+		{
+			if (aniAttack == false)
 			{
-				aniWalk = false;
-				hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+				hellNode->PlayAnim("../../Meshes/attack2.md5anim");
+				aniAttack = true;
 
 			}
+		}
+
+		if (timec > 450)
+		{
+
+			if (aniIdle == false)
+			{
+
+				hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+				aniIdle = true;
+
+			}
+			hellNightY += 8;
+		}
+
+		if (timec > 500)
+		{
+			curScene++;
+
+		}
 	}
+
 
 
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_SPACE))
@@ -298,9 +331,10 @@ void Renderer::UpdateScene(float msec) {
 	*/
 	emitter->Update(msec);
 	camera->UpdateCamera(msec);
-
 	viewMatrix = camera->BuildViewMatrix();
+	
 	root->Update(msec);
+
 	hellNode->Update(msec);
 
 	waterRotate += msec / 1000.0f;
@@ -314,7 +348,13 @@ void Renderer::UpdateScene(float msec) {
 
 void Renderer::RenderScene() {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	DrawScene_B ();
+
+	if(curScene==1)  DrawScene_A ();
+
+	if(curScene==2)   DrawScene_B();
+
+
+
 	SwapBuffers();
 
 }
@@ -417,13 +457,14 @@ void Renderer::DrawShadowScene() {
 	light->GetPosition(), Vector3(0, 0, 0));
 	textureMatrix = biasMatrix * (projMatrix * viewMatrix);
 	UpdateShaderMatrices();
-	DrawFloor();
+	//DrawFloor();
 	DrawMesh();
 	glUseProgram(0);
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	glViewport(0, 0, width, height);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
 
 void Renderer::DrawCombinedScene() {
 	SetCurrentShader(sceneShader);
@@ -436,7 +477,7 @@ void Renderer::DrawCombinedScene() {
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
 	viewMatrix = camera->BuildViewMatrix();
 	UpdateShaderMatrices();
-	DrawFloor();
+	//DrawFloor();
 	DrawMesh();
 	
 	glUseProgram(0);
@@ -470,10 +511,10 @@ void Renderer::DrawParticle()
 	emitter->SetParticleSpeed(1.0f);
 	
 
-	modelMatrix.ToIdentity();
+	/*modelMatrix.ToIdentity();
 	Matrix4 tempMatrix = textureMatrix * modelMatrix;
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
-	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
+	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);*/
 	UpdateShaderMatrices();
 
 
@@ -498,35 +539,54 @@ string Renderer::FloatToString(float msec)
 
 void Renderer::DrawMesh() {
 	modelMatrix.ToIdentity();
-	modelMatrix.SetPositionVector(Vector3(hellNightX, 110, 600));
-	modelMatrix.SetScalingVector(Vector3(2, 2, 2));
-	
+	//modelMatrix.SetScalingVector(Vector3(10, 10, 10));
+	modelMatrix.SetPositionVector(Vector3(hellNightX, hellNightY, 600));
 	
 	Matrix4 tempMatrix = textureMatrix * modelMatrix;
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
 
-    /*if (aniWalk == true)
-		{
-			hellNode->PlayAnim("../../Meshes/walk7.md5anim");
-			
-		}
-	else
-		hellNode->PlayAnim("../../Meshes/idle2.md5anim");*/
+   
 	hellNode->Draw(*this);
 }
 
+
+
 void Renderer::DrawFloor() {
 	modelMatrix.ToIdentity();
-	modelMatrix = Matrix4::Rotation(90, Vector3(1, 0, 0))*Matrix4::Scale(Vector3(650, 650, 1));
+	modelMatrix = Matrix4::Rotation(90, Vector3(1, 0, 0))*Matrix4::Scale(Vector3(2650, 2650, 1));
 	modelMatrix.SetPositionVector(Vector3(-100, 110, 500));
-	//modelMatrix.SetScalingVector(Vector3(1000, 1000, 1000));
+	
 	
 	Matrix4 tempMatrix = textureMatrix * modelMatrix;
 
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
 	floor->Draw(); 
+
+}
+
+void Renderer::DrawHell()
+{
+	SetCurrentShader(sceneShader);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "shadowTex"), 2);
+	glUniform3fv(glGetUniformLocation(currentShader->GetProgram(), "cameraPos"), 1, (float*)&camera->GetPosition());
+	SetShaderLight(*light);
+	
+	
+	modelMatrix.ToIdentity();
+	modelMatrix.SetPositionVector(Vector3(hellNightX, hellNightY, 600));
+	
+	Matrix4 tempMatrix = textureMatrix * modelMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
+	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
+
+
+	hellNode->Draw(*this);
+
+	
 
 }
 
@@ -557,8 +617,26 @@ void Renderer::DrawText(const std::string &text, const Vector3 &position, const 
 }
 
 
+
+
+
+
 void Renderer::DrawScene_A()
 {
+
+
+	DrawSkybox();
+
+	DrawFPS();
+	DrawShadowScene(); // First render pass ...
+	DrawCombinedScene(); // Second render pass ...
+	if(timec>450)
+	DrawParticle();
+}
+
+void Renderer::DrawScene_B()
+{
+
 	DrawSkybox();
 	DrawHeightmap();
 	DrawFPS();
@@ -566,21 +644,10 @@ void Renderer::DrawScene_A()
 	DrawCube();
 	DrawShadowScene(); // First render pass ...
 	DrawCombinedScene(); // Second render pass ...
-	DrawParticle();
-}
-
-void Renderer::DrawScene_B()
-{
-	camera->SetPosition(Vector3(-429,499, 1947));
-	camera->SetPitch(4);
-	camera->SetYaw(352);
-
-	DrawSkybox();
-	DrawFPS();
-	DrawShadowScene(); // First render pass ...
-	DrawCombinedScene(); // Second render pass ...
 	//DrawParticle();
 }
+
+
 
 void Renderer::DrawScene_C()
 {

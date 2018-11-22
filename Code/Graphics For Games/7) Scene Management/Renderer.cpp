@@ -18,7 +18,8 @@ Renderer::Renderer(Window &parent) : OGLRenderer(parent) {
 		s->SetModelScale(Vector3(100.0f, 100.0f, 100.0f)); 
 		s->SetBoundingRadius(100.0f); 
 		s->SetMesh(quad); 
-		root->AddChild(s);  } 
+		root->AddChild(s);  
+	} 
 	root->AddChild(new CubeRobot());
 	glEnable(GL_DEPTH_TEST); 
 	glEnable(GL_BLEND); 
@@ -79,13 +80,18 @@ void Renderer::DrawNode(SceneNode*n) {
 	} 
 }
 void Renderer::RenderScene() { 
-	BuildNodeLists(root); 
-	SortNodeLists(); 
+	 
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT); 
+	BuildNodeLists(root); 
+	SortNodeLists();
 	glUseProgram(currentShader->GetProgram()); 
 	UpdateShaderMatrices();
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),  "diffuseTex"), 0);  DrawNodes(); 
-	glUseProgram(0);  SwapBuffers();  ClearNodeLists();  } 
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),  "diffuseTex"), 0); 
+	DrawNodes(); 
+	glUseProgram(0);  
+	SwapBuffers(); 
+	ClearNodeLists(); 
+} 
 void Renderer::ClearNodeLists() { 
 	transparentNodeList.clear(); 
 	nodeList.clear(); 

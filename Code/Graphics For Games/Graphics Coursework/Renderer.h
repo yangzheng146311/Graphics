@@ -29,10 +29,13 @@ protected:
 	void DrawCube();
 	void DrawMesh(); // New !
 	void DrawFloor(); // New !
+
 	void DrawShadowScene(); // New !
+	
 	void DrawCombinedScene(); // New !
 	void DrawFPS();
 	void DrawParticle();
+	void DrawHell();
 	void DrawScene_A();
 	void DrawScene_B();
 	void DrawScene_C();
@@ -43,7 +46,8 @@ protected:
 	void	DrawText(const std::string &text, const Vector3 &position, const float size = 10.0f, const bool perspective = false);
 
 	SceneNode* root;
-
+	
+	Shader * hellShader;
 	Shader * textShader;
 	Shader * cubeShader;
 	Shader * lightShader;
@@ -69,7 +73,7 @@ protected:
 
 	ParticleEmitter*	emitter;	//A single particle emitter
 
-
+	
 
 
 	float waterRotate;
@@ -79,6 +83,8 @@ protected:
 	bool lightRight = true;
 	bool camMove = false;
 	bool aniWalk = true;
+	bool aniIdle = false;
+	bool aniAttack = false;
 	
 	float LightOriginRadius;
 	float LightOriginPosZ;
@@ -98,5 +104,6 @@ protected:
 	float timec = 0.0f;
 	
 	int dir = 1;
+	int curScene = 2;
 
 };
