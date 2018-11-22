@@ -1,9 +1,8 @@
 #include "CubeRoot.h"
-
+#include"../Graphics For Games/Graphics Coursework/Renderer.h"
  Mesh* CubeRobot::cube = NULL;
  Mesh* CubeRobot::sphere = NULL;
  
-
  CubeRobot::CubeRobot(void) {
 	 //Optional , uncomment if you want a local origin marker!
 		 //SetMesh(cube);
@@ -11,10 +10,11 @@
 
 	 //expand 100times scale
 
-SceneNode*body = new SceneNode(sphere, Vector4(1, 0, 1, 1)); //Red!
+SceneNode*body = new SceneNode(0, Vector4(1, 1, 1, 0)); //Red!
 //body->SetModelScale(Vector3(10, 15, 50));
 body->SetModelScale(Vector3(150, 150, 150));
-body->SetTransform(Matrix4::Translation(Vector3(0, 800,0 )));
+//body->SetTransform(Matrix4::Translation(Vector3(0, 800,0 )));
+body->SetTransform(Matrix4::Translation(Vector3(0, 2000, 0)));
 AddChild(body);
 
 head = new SceneNode(cube, Vector4(0.5f, 0.6f, 0.4f, 0)); //Green!

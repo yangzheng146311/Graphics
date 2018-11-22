@@ -17,9 +17,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	//camera->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 2500.0f, RAW_WIDTH * HEIGHTMAP_X));
 
 
-	/*camera->SetPosition(Vector3(-429, 499, 1947));
-	camera->SetPitch(4);
-	camera->SetYaw(352);*/
+	
 
 	camera->SetPosition(Vector3(CamOriX, CamOriY,CamOriZ));
 	camera->SetPitch(CamOriPitch);
@@ -77,11 +75,11 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	floor = Mesh::GenerateQuad();
-	/*floor->SetTexture(SOIL_load_OGL_texture("../../Textures/brick.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-	floor->SetBumpMap(SOIL_load_OGL_texture("../../Textures/brickDOT3.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));*/
+	floor->SetTexture(SOIL_load_OGL_texture("../../Textures/brick.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	floor->SetBumpMap(SOIL_load_OGL_texture("../../Textures/brickDOT3.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 
-	floor->SetTexture(SOIL_load_OGL_texture("../../MyTextures/concrete.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-	floor->SetBumpMap(SOIL_load_OGL_texture("../../MyTextures/concreteN.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	//floor->SetTexture(SOIL_load_OGL_texture("../../MyTextures/dryfloor.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	//floor->SetBumpMap(SOIL_load_OGL_texture("../../MyTextures/dryfloorN.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	
 	
 	quad->SetTexture(SOIL_load_OGL_texture("../../MyTextures/water1.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
@@ -149,19 +147,17 @@ Renderer ::~Renderer(void) {
 void Renderer::UpdateScene(float msec) {
 	
 	std::cout << timec << endl;
-
-	
+	curMsec = msec;
 	timec += 1;
-
 
 	if (curScene == 1)
 	{
 		if (timec == 200) hellNode->PlayAnim("../../Meshes/walk7.md5anim");
 		if (timec > 200)
 		{
-			if (hellNightX > -200)
+			if (hellNightX > -800)
 			{
-				hellNightX -= 8;
+				hellNightX -= 6;
 			}
 
 			else
@@ -196,11 +192,30 @@ void Renderer::UpdateScene(float msec) {
 			hellNightY += 8;
 		}
 
-		if (timec > 500)
+
+		
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_SPACE))
 		{
 			curScene++;
+			timec = 0;
+			hellNightY +=2000.0f;
+			hellNightX = 0;
+			hellNightZ = 0;
+			camera->SetPosition(Vector3(-1239, 1678, 3616));
+			camera->SetPitch(-9);
+			camera->SetYaw(341);
 
 		}
+	}
+
+	if (curScene == 2) {
+
+		if(hellNightY>100)
+		hellNightY -= 8;
+		
+		if (timec = 200)
+			lightOn = true;
+		
 	}
 
 
@@ -212,123 +227,135 @@ void Renderer::UpdateScene(float msec) {
 		else
 			camMove = true;
 	}
-	curMsec = msec;
-	////Light Radius Change
-	//{
-	//	float r = light->GetRadius();
-	//	if (r > LightOriginRadius)
-	//	{
 
-	//		lightOff = true;
-	//	}
-
-	//	if (r < 0.0f)
-	//	{
-
-	//		lightOff = false;
-	//	}
-
-
-	//	if (lightOff == true)
-	//	{
-	//		r -= 50;
-	//	}
-	//	else
-	//	{
-	//		r += 50;
-	//	}
-
-	//	light->SetRadius(r);
-	//}
-
-	////Light Color Change
+	//CamMove
 	{
-		/*Vector4 colour = light->GetColour();
+		/*if (camMove)
+		{
+			curYaw += 1.0f*dir;
+			if (curYaw > 720.0f || curYaw < 0.0f)
+			{
 
-		colour.x -= 0.001f;
-		if (colour.x < 0) colour.x = 1.0f;
-		colour.y -= 0.004f;
-		if (colour.y < 0) colour.y = 1.0f;
-		colour.z -= 0.007f;
-		if (colour.z < 0) colour.z = 1.0f;
-		light->SetColour(colour);*/
+				dir *= -1;
+			}
+		}*/
+		//float CamCurX = CamOriZ * sin(curYaw*PI / 180.0f) + CamOriX;
+		//float CamCurZ = -CamOriZ * cos(curYaw*PI / 180.0f) + CamOriZ;
+
+		/*camera->SetPosition(Vector3(CamOriX, CamOriY, CamOriZ));
+		float nowYaw = CamOriYaw + curYaw;
+		camera->SetYaw(nowYaw*0.1f);
+		camera->SetPitch(nowYaw*-0.1f);*/
+
+		/*curAngel += 1.0f;
+		if (curAngel > 360.0f) curAngel = 0.0f;
+
+		curPitch += 0.001f;
+		if (curPitch > 90.0f) curPitch = 0.0f;
+		double camX = CamOriX * cos(curAngel*PI/180.0f);
+		double camZ= CamOriX * sin(curAngel*PI / 180.0f);
+		double camPitch = CamOriPitch += curPitch;*/
+
+
+		/*camera->SetPosition(Vector3((float)camX, 1000.0f, (float)camZ));
+		camera->SetYaw((float)camPitch);
+		*/
+
 	}
 
-	//Light Position Change
+	if (lightOn == true)
 	{
-		Vector3 pos = light->GetPosition();
 
-		if (pos.x > LightOriginPosX)
+		//Light Radius Change
 		{
 
-			lightRight = false;
+			float r = light->GetRadius();
+			if (r > LightOriginRadius)
+			{
+
+				lightOff = true;
+			}
+
+			if (r < 0.0f)
+			{
+
+				lightOff = false;
+			}
+
+
+			if (lightOff == true)
+			{
+				r -= 50;
+			}
+			else
+			{
+				r += 50;
+			}
+
+			light->SetRadius(r);
 		}
 
-		if (pos.x < LightOriginPosX - 4000.0f)
+		//Light Color Change
 		{
+			Vector4 colour = light->GetColour();
 
-			lightRight = true;
+			colour.x -= 0.001f;
+			if (colour.x < 0) colour.x = 1.0f;
+			colour.y -= 0.004f;
+			if (colour.y < 0) colour.y = 1.0f;
+			colour.z -= 0.007f;
+			if (colour.z < 0) colour.z = 1.0f;
+			light->SetColour(colour);
 		}
 
-		if (pos.y > LightOriginPosY)
+		//Light Position Change
 		{
+			Vector3 pos = light->GetPosition();
 
-			lightUp = false;
+			if (pos.x > LightOriginPosX)
+			{
+
+				lightRight = false;
+			}
+
+			if (pos.x < LightOriginPosX - 4000.0f)
+			{
+
+				lightRight = true;
+			}
+
+			if (pos.y > LightOriginPosY)
+			{
+
+				lightUp = false;
+			}
+
+			if (pos.y < LightOriginPosY - 4000.0f)
+			{
+
+				lightUp = true;;
+			}
+			if (pos.z > LightOriginPosZ)
+			{
+
+				lightFront = false;
+			}
+			if (pos.z < LightOriginPosZ - 4000.0f)
+			{
+
+				lightFront = true;
+			}
+			if (lightRight == true) pos.x += 10.f;
+			else pos.x -= 10.0f;
+			/*if (lightUp == true) pos.y += 10.f;
+			else pos.y -= 10.0f;*/
+			if (lightFront == true) pos.z += 10.f;
+			else pos.z -= 10.0f;
+			light->SetPosition(pos);
 		}
-
-		if (pos.y < LightOriginPosY - 4000.0f)
-		{
-
-			lightUp = true;;
-		}
-		if (pos.z > LightOriginPosZ)
-		{
-
-			lightFront = false;
-		}
-		if (pos.z < LightOriginPosZ - 4000.0f)
-		{
-
-			lightFront = true;
-		}
-		if (lightRight == true) pos.x += 10.f;
-		else pos.x -= 10.0f;
-		/*if (lightUp == true) pos.y += 10.f;
-		else pos.y -= 10.0f;*/
-		if (lightFront == true) pos.z += 10.f;
-		else pos.z -= 10.0f;
-		//light->SetPosition(pos);
 	}
-		//if (camMove)
-		//{
-		//	curYaw += 1.0f*dir;
-		//	if (curYaw > 720.0f || curYaw < 0.0f)
-		//	{
 
-		//		dir *= -1;
-		//	}
-		//}
-		////float CamCurX = CamOriZ * sin(curYaw*PI / 180.0f) + CamOriX;
-		////float CamCurZ = -CamOriZ * cos(curYaw*PI / 180.0f) + CamOriZ;
-		//
-		//camera->SetPosition(Vector3(CamOriX, CamOriY, CamOriZ));
-		//float nowYaw = CamOriYaw + curYaw;
-		//camera->SetYaw(nowYaw*0.1f);
-		//camera->SetPitch(nowYaw*-0.1f);
-
-	/*curAngel += 1.0f;
-	if (curAngel > 360.0f) curAngel = 0.0f;
-
-	curPitch += 0.001f;
-	if (curPitch > 90.0f) curPitch = 0.0f;
-	double camX = CamOriX * cos(curAngel*PI/180.0f);
-	double camZ= CamOriX * sin(curAngel*PI / 180.0f);
-	double camPitch = CamOriPitch += curPitch;*/
-	
-	
-	/*camera->SetPosition(Vector3((float)camX, 1000.0f, (float)camZ));
-	camera->SetYaw((float)camPitch);
-	*/
+		
 	emitter->Update(msec);
 	camera->UpdateCamera(msec);
 	viewMatrix = camera->BuildViewMatrix();
@@ -421,6 +448,7 @@ void Renderer::DrawCube()
 	glUseProgram(currentShader->GetProgram());
 	UpdateShaderMatrices();
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 1);
+	
 	DrawNode(root);
 	glUseProgram(0);
 }
@@ -457,7 +485,10 @@ void Renderer::DrawShadowScene() {
 	light->GetPosition(), Vector3(0, 0, 0));
 	textureMatrix = biasMatrix * (projMatrix * viewMatrix);
 	UpdateShaderMatrices();
-	//DrawFloor();
+	if (curScene == 1)
+	{
+		DrawFloor();
+	}
 	DrawMesh();
 	glUseProgram(0);
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -477,7 +508,10 @@ void Renderer::DrawCombinedScene() {
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
 	viewMatrix = camera->BuildViewMatrix();
 	UpdateShaderMatrices();
-	//DrawFloor();
+	if (curScene == 1)
+	{
+		DrawFloor();
+	}
 	DrawMesh();
 	
 	glUseProgram(0);
@@ -539,8 +573,9 @@ string Renderer::FloatToString(float msec)
 
 void Renderer::DrawMesh() {
 	modelMatrix.ToIdentity();
-	//modelMatrix.SetScalingVector(Vector3(10, 10, 10));
-	modelMatrix.SetPositionVector(Vector3(hellNightX, hellNightY, 600));
+	modelMatrix.SetScalingVector(Vector3(4, 4, 4));
+	
+	modelMatrix.SetPositionVector(Vector3(hellNightX, hellNightY, hellNightZ));
 	
 	Matrix4 tempMatrix = textureMatrix * modelMatrix;
 	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
@@ -554,8 +589,8 @@ void Renderer::DrawMesh() {
 
 void Renderer::DrawFloor() {
 	modelMatrix.ToIdentity();
-	modelMatrix = Matrix4::Rotation(90, Vector3(1, 0, 0))*Matrix4::Scale(Vector3(2650, 2650, 1));
-	modelMatrix.SetPositionVector(Vector3(-100, 110, 500));
+	modelMatrix = Matrix4::Rotation(90, Vector3(1, 0, 0))*Matrix4::Scale(Vector3(3600, 3600, 1));
+	modelMatrix.SetPositionVector(Vector3(0, 110, 0));
 	
 	
 	Matrix4 tempMatrix = textureMatrix * modelMatrix;
@@ -623,7 +658,9 @@ void Renderer::DrawText(const std::string &text, const Vector3 &position, const 
 
 void Renderer::DrawScene_A()
 {
-
+	/*camera->SetPosition(Vector3(-429, 499, 1947));
+	camera->SetPitch(4);
+	camera->SetYaw(352);*/
 
 	DrawSkybox();
 
@@ -641,10 +678,11 @@ void Renderer::DrawScene_B()
 	DrawHeightmap();
 	DrawFPS();
 	DrawWater();
-	DrawCube();
+	
 	DrawShadowScene(); // First render pass ...
 	DrawCombinedScene(); // Second render pass ...
-	//DrawParticle();
+	DrawCube();
+	DrawParticle();
 }
 
 

@@ -19,7 +19,7 @@ public:
 
 	virtual void RenderScene();
 	virtual void UpdateScene(float msec);
-
+	
 protected:
 
 	void DrawHeightmap();
@@ -85,25 +85,28 @@ protected:
 	bool aniWalk = true;
 	bool aniIdle = false;
 	bool aniAttack = false;
+	bool lightOn = false;
 	
 	float LightOriginRadius;
 	float LightOriginPosZ;
 	float LightOriginPosY;
 	float LightOriginPosX;
-	double CamOriX= 2183.0f;
-	double CamOriY= 1335.0f;
-	double CamOriZ= 2103.0f;
-	double CamOriPitch = -24.0f;
-	double CamOriYaw =49.5f;
+	double CamOriX= 434;
+	double CamOriY= 835.0f;
+	double CamOriZ= 687.0f;
+	double CamOriPitch = -22.0f;
+	double CamOriYaw =55.0f;
 	double curYaw;
 	float curMsec;
 
-	float hellNightX=400;
+	float hellNightX=0;
 	float hellNightY=110;
-	float hellNightZ=600;
+	float hellNightZ=0;
 	float timec = 0.0f;
 	
 	int dir = 1;
-	int curScene = 2;
+	int curScene = 1;
+
+	
 
 };
