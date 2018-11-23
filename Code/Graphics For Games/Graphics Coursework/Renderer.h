@@ -89,12 +89,12 @@ protected:
 
 	ParticleEmitter*	emitter;	//A single particle emitter
 
-	Vector3 cam_S1_OriPos=Vector3(-1239,1678,3616);
-	double S1_CamOriPitch = -18;
-	double S1_CamOriYalw = 334;
-	Vector3 cam_S2_OriPos= Vector3(-1239, 1678, 3616);
-	double S2_CamOriPitch = -18;
-	double S2_CamOriYalw = 334;
+	Vector3 cam_S1_OriPos=Vector3(-488,928,1623);
+	double S1_CamOriPitch = -19;
+	double S1_CamOriYalw = 4;
+	Vector3 cam_S2_OriPos= Vector3(-859, 425, 1572);
+	double S2_CamOriPitch = 9;
+	double S2_CamOriYalw = 328;
 	Vector3 cam_S3_OriPos = Vector3(-2087,2843, 5308);
 	double S3_CamOriPitch = -25;
 	double S3_CamOriYalw = 309;
@@ -112,13 +112,16 @@ protected:
 	bool aniAttack = false;
 	bool lightOn = false;
 	bool timeStop = false;
-	
+	bool toggleCam = true;
+	float toggleCD = 0.0f;
+	float toggleCamCD = 0.0f;
 	float LightOriginRadius;
 	float LightOriginPosZ;
 	float LightOriginPosY;
 	float LightOriginPosX;
 	
 	double curYaw;
+	double oriYaw;
 	float curMsec;
 
 	float hellNightX=0;

@@ -5,7 +5,7 @@
 
 int main() {
 	
-	Window w("Cube Mapping! sky textures courtesy of http://www.hazelwhorley.com", 800, 600, false);
+	Window w("Cube Mapping! sky textures courtesy of http://www.hazelwhorley.com", 1920, 1080, true);
 	if (!w.HasInitialised()) {
 		return -1;
 	}

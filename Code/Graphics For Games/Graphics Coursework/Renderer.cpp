@@ -139,7 +139,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 
-
+	oriYaw = camera->GetYaw();
 	floor = Mesh::GenerateQuad();
 	floor->SetTexture(SOIL_load_OGL_texture("../../Textures/brick.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	floor->SetBumpMap(SOIL_load_OGL_texture("../../Textures/brickDOT3.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
@@ -233,26 +233,28 @@ void Renderer::UpdateScene(float msec) {
 	
 	
 	
-		/*if (stopCD<0.0f)
+		if (stopCD==0.0f)
 		{
-			if (Window::GetKeyboard()->KeyDown(KEYBOARD_K))
+			if (Window::GetKeyboard()->KeyDown(KEYBOARD_PAUSE))
 			{
-
-				if (timeStop == false) {
+				if (timeStop == false)
+				{
 					timeStop = true;
-					stopCD = 160.0f;
+					stopCD = 60.0f;
 				}
-				if (timeStop == true)
+
+				else
 				{
 					timeStop = false;
-					stopCD = 160.0f;
+					stopCD = 60.0f;
+
 				}
 			}
 		}
-	
-	stopCD -= 1.0f;*/
-
-
+	if(stopCD>0)
+	stopCD -= 1.0f;
+	if (toggleCD > 0)
+	toggleCD -= 1.0f;
 
 
 	std::cout << timec << endl;
@@ -304,7 +306,7 @@ void Renderer::UpdateScene(float msec) {
 			hellNightY += 8;
 		}
 
-		if (timec > 450 && timeStop == false)
+		if (timec > 650 && timeStop == false)
 		{
 			curScene++;
 			hellNode->PlayAnim("../../Meshes/idle2.md5anim");
@@ -322,19 +324,6 @@ void Renderer::UpdateScene(float msec) {
 
 		}
 		
-		if (Window::GetKeyboard()->KeyDown(KEYBOARD_RIGHT))
-		{
-			curScene = 2;
-			hellNode->PlayAnim("../../Meshes/idle2.md5anim");
-			
-				hellNightY = 2000.0f;
-				hellNightX = 0;
-				hellNightZ = 0;
-				camera->SetPosition(cam_S2_OriPos);
-				camera->SetPitch(S2_CamOriPitch);
-				camera->SetYaw(S2_CamOriYalw);
-			    timec = 0;
-		}
 	}
 
 	if (curScene == 2) {
@@ -351,78 +340,57 @@ void Renderer::UpdateScene(float msec) {
 			timec = 0;
 		}*/
 
-		if (Window::GetKeyboard()->KeyDown(KEYBOARD_LEFT))
-		{
-			curScene=1;
-			hellNode->PlayAnim("../../Meshes/idle2.md5anim");
-			light->SetPosition(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f - 1000.0f), 500.0f,
-					(RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)));
-			light->SetColour(Vector4(1.0f, 1.0f, 1.0f, 1));
-			light->SetRadius((RAW_WIDTH * HEIGHTMAP_X) / 0.2f);
-			lightOn = false;
-			hellNightY = 110.0f;
-			hellNightX = 0;
-			hellNightZ = 0;
-			camera->SetPosition(cam_S1_OriPos);
-			camera->SetPitch(S1_CamOriPitch);
-			camera->SetYaw(S1_CamOriYalw);
-			timec = 0;
-		}
-
-		if (Window::GetKeyboard()->KeyDown(KEYBOARD_RIGHT))
-		{
-			    curScene=3;
-				camera->SetPosition(cam_S3_OriPos);
-				camera->SetPitch(S3_CamOriPitch);
-				camera->SetYaw(S3_CamOriYalw);
-			    timec = 0;
-		}
 		
 	}
 
 	if (curScene == 3) {
 
-		if (Window::GetKeyboard()->KeyDown(KEYBOARD_LEFT))
-		{
-			curScene = 2;
-			hellNode->PlayAnim("../../Meshes/idle2.md5anim");
-			hellNightY = 2000.0f;
-			hellNightX = 0;
-			hellNightZ = 0;
-			camera->SetPosition(cam_S2_OriPos);
-			camera->SetPitch(S2_CamOriPitch);
-			camera->SetYaw(S2_CamOriYalw);
-			timec = 0;
-		}
+
 	
 	}
 
-	if (Window::GetKeyboard()->KeyDown(KEYBOARD_SPACE))
+	if (Window::GetKeyboard()->KeyDown(KEYBOARD_M))
 	{
-		if (camMove == true)
-			camMove = false;
-		else
-			camMove = true;
+
+		if (toggleCamCD == 0.0f)
+		{
+
+			if (camMove == true)
+			{
+				camMove = false;
+				toggleCamCD = 60.0f;
+			}
+
+			else
+			{
+				camMove = true;
+				toggleCamCD = 60.0f;
+			}
+			
+		}
 	}
 
 	//CamMove
 	{
-		/*if (camMove)
-		{
-			curYaw += 1.0f*dir;
-			if (curYaw > 720.0f || curYaw < 0.0f)
-			{
+		//if (camMove)
+		//{
+		//	curYaw += 1.0f*dir;
+		//	if (curYaw > 720.0f || curYaw < 0.0f)
+		//	{
 
-				dir *= -1;
-			}
-		}*/
-		//float CamCurX = CamOriZ * sin(curYaw*PI / 180.0f) + CamOriX;
-		//float CamCurZ = -CamOriZ * cos(curYaw*PI / 180.0f) + CamOriZ;
+		//		dir *= -1;
+		//	}
 
-		/*camera->SetPosition(Vector3(CamOriX, CamOriY, CamOriZ));
-		float nowYaw = CamOriYaw + curYaw;
-		camera->SetYaw(nowYaw*0.1f);
-		camera->SetPitch(nowYaw*-0.1f);*/
+
+		//	float nowYaw =   +curYaw;
+		//	camera->SetYaw(nowYaw*0.1f);
+		//	//camera->SetPitch(nowYaw*-0.1f);
+		//}
+		/*float CamCurX = CamOriZ * sin(curYaw*PI / 180.0f) + CamOriX;
+		float CamCurZ = -CamOriZ * cos(curYaw*PI / 180.0f) + CamOriZ;
+
+		camera->SetPosition(Vector3(CamOriX, CamOriY, CamOriZ));*/
+		
 
 		/*curAngel += 1.0f;
 		if (curAngel > 360.0f) curAngel = 0.0f;
@@ -453,7 +421,7 @@ void Renderer::UpdateScene(float msec) {
 				lightOff = true;
 			}
 
-			if (r < 0.0f)
+			if (r < 0.0f&&timeStop==false)
 			{
 
 				lightOff = false;
@@ -706,7 +674,7 @@ void Renderer::DrawFPS()
 	string status = "";
 	if (timeStop == false) status = "Running";
 	else status = "Pause";
-		DrawText("FPS:" + FloatToString(1000.0f / curMsec)+" "+status+" "+ FloatToString(timec) + " " + FloatToString(stopCD), Vector3(0, 0, 0), 16.0f);
+		DrawText("FPS:" + FloatToString(1000.0f / curMsec)+" "+status+" "+ FloatToString(timec) + " " + FloatToString(stopCD) + " " + FloatToString(toggleCD), Vector3(0, 0, 0), 16.0f);
 	DrawText("hahaha", Vector3(-54,11500,49), 64.0f, true);
 
 	glUseProgram(0);	//That's everything!
@@ -811,7 +779,7 @@ void Renderer::DrawScene_A()
 	/*camera->SetPosition(Vector3(-429, 499, 1947));
 	camera->SetPitch(4);
 	camera->SetYaw(352);*/
-
+	oriYaw = camera->GetYaw();
 	DrawSkybox();
 
 	modelMatrix.ToIdentity();
@@ -823,11 +791,33 @@ void Renderer::DrawScene_A()
 	DrawCombinedScene(); // Second render pass ...
 	/*if(timec>450)
 	DrawParticle();*/
+	if (Window::GetKeyboard()->KeyDown(KEYBOARD_RIGHT))
+	{
+	
+		if (toggleCD == 0.0f)
+		{
+			curScene = 2;
+
+
+			hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+			hellNightY = 2000.0f;
+			hellNightX = 0;
+			hellNightZ = 0;
+			camera->SetPosition(cam_S2_OriPos);
+			camera->SetPitch(S2_CamOriPitch);
+			camera->SetYaw(S2_CamOriYalw);
+			oriYaw = camera->GetYaw();
+			timec = 0;
+			toggleCD = 60.0f;
+		}
+	}
+
+
 }
 
 void Renderer::DrawScene_B()
 {
-
+	oriYaw = camera->GetYaw();
 	DrawSkybox();
 	DrawHeightmap();
 	DrawFPS();
@@ -842,18 +832,77 @@ void Renderer::DrawScene_B()
 		DrawParticle();
 	}
 	
+
+	if (Window::GetKeyboard()->KeyDown(KEYBOARD_LEFT))
+	{
+		if (toggleCD == 0)
+		{
+			curScene = 1;
+			hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+			light->SetPosition(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f - 1000.0f), 500.0f,
+				(RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)));
+			light->SetColour(Vector4(1.0f, 1.0f, 1.0f, 1));
+			light->SetRadius((RAW_WIDTH * HEIGHTMAP_X) / 0.2f);
+			lightOn = false;
+			hellNightY = 110.0f;
+			hellNightX = 0;
+			hellNightZ = 0;
+			camera->SetPosition(cam_S1_OriPos);
+			camera->SetPitch(S1_CamOriPitch);
+			camera->SetYaw(S1_CamOriYalw);
+			oriYaw = camera->GetYaw();
+			timec = 0; 
+			toggleCD = 60.0f;
+		}
+	}
+
+	if (Window::GetKeyboard()->KeyDown(KEYBOARD_RIGHT))
+	{
+		if (toggleCD == 0.0f)
+		{
+			curScene = 3;
+			camera->SetPosition(cam_S3_OriPos);
+			camera->SetPitch(S3_CamOriPitch);
+			camera->SetYaw(S3_CamOriYalw);
+			oriYaw = camera->GetYaw();
+			timec = 0;
+			toggleCD = 60.0f;
+		}
+	}
+	
+
 }
 
 void Renderer::DrawScene_C()
 {
+	oriYaw = camera->GetYaw();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	modelMatrix.ToIdentity();
+	textureMatrix.ToIdentity();
+	UpdateShaderMatrices();
 	DrawFPS();
-	
 	FillBuffers();
 	DrawPointLights();
 	CombineBuffers();
 	
+	if (Window::GetKeyboard()->KeyDown(KEYBOARD_LEFT))
+	{
+		if (toggleCD == 0)
+		{
+			curScene = 2;
+			hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+			hellNightY = 2000.0f;
+			hellNightX = 0;
+			hellNightZ = 0;
+			camera->SetPosition(cam_S2_OriPos);
+			camera->SetPitch(S2_CamOriPitch);
+			camera->SetYaw(S2_CamOriYalw);
+			oriYaw = camera->GetYaw();
+			timec = 0;
+			toggleCD = 60.0f;
+		}
+	}
 }
 
 void Renderer::GenerateScreenTexture(GLuint &into, bool depth) {
