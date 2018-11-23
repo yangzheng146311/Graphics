@@ -93,6 +93,7 @@ protected:
 	bool aniIdle = false;
 	bool aniAttack = false;
 	bool lightOn = false;
+	bool timeStop = false;
 	
 	float LightOriginRadius;
 	float LightOriginPosZ;
@@ -106,6 +107,7 @@ protected:
 	float hellNightY=110;
 	float hellNightZ=0;
 	float timec = 0.0f;
+	float stopCD = 0.0f;
 	
 	int dir = 1;
 	int curScene = 1;

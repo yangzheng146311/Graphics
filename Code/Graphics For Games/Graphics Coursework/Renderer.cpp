@@ -149,14 +149,40 @@ Renderer ::~Renderer(void) {
 
 void Renderer::UpdateScene(float msec) {
 	
+	
+	
+		/*if (stopCD<0.0f)
+		{
+			if (Window::GetKeyboard()->KeyDown(KEYBOARD_K))
+			{
+
+				if (timeStop == false) {
+					timeStop = true;
+					stopCD = 160.0f;
+				}
+				if (timeStop == true)
+				{
+					timeStop = false;
+					stopCD = 160.0f;
+				}
+			}
+		}
+	
+	stopCD -= 1.0f;*/
+
+
+
+
 	std::cout << timec << endl;
 	curMsec = msec;
-	timec += 1;
-
+	if (timeStop == false)
+	{
+		timec += 1;
+	}
 	if (curScene == 1)
 	{
 		if (timec == 100) hellNode->PlayAnim("../../Meshes/walk7.md5anim");
-		if (timec > 100)
+		if (timec > 100 && timeStop == false)
 		{
 			if (hellNightX > -800)
 			{
@@ -172,7 +198,7 @@ void Renderer::UpdateScene(float msec) {
 				}
 		}
 
-		if (timec > 200)
+		if (timec > 200 && timeStop == false)
 		{
 			if (aniAttack == false)
 			{
@@ -182,7 +208,7 @@ void Renderer::UpdateScene(float msec) {
 			}
 		}
 
-		if (timec > 400)
+		if (timec > 400 && timeStop == false)
 		{
 
 			if (aniIdle == false)
@@ -193,6 +219,24 @@ void Renderer::UpdateScene(float msec) {
 
 			}
 			hellNightY += 8;
+		}
+
+		if (timec > 450 && timeStop == false)
+		{
+			curScene++;
+			hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+			if (curScene == 2)
+			{
+				hellNightY = 2000.0f;
+				hellNightX = 0;
+				hellNightZ = 0;
+				camera->SetPosition(cam_S2_OriPos);
+				camera->SetPitch(S2_CamOriPitch);
+				camera->SetYaw(S2_CamOriYalw);
+			}
+			timec = 0;
+
+
 		}
 
 		
@@ -216,7 +260,7 @@ void Renderer::UpdateScene(float msec) {
 
 	if (curScene == 2) {
 
-		if(hellNightY>100)
+		if(hellNightY>100 && timeStop == false)
 		hellNightY -= 8;
 		
 		if (timec == 300)
@@ -546,8 +590,10 @@ void Renderer::DrawFPS()
 	//And turn on texture unit 0
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
 	//Render function to encapsulate our font rendering!
-	
-	DrawText("FPS:"+FloatToString(1000.0f/curMsec), Vector3(0, 0, 0), 16.0f);
+	string status = "";
+	if (timeStop == false) status = "Running";
+	else status = "Pause";
+		DrawText("FPS:" + FloatToString(1000.0f / curMsec)+" "+status+" "+ FloatToString(timec) + " " + FloatToString(stopCD), Vector3(0, 0, 0), 16.0f);
 	DrawText("hahaha", Vector3(-54,11500,49), 64.0f, true);
 
 	glUseProgram(0);	//That's everything!
