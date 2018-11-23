@@ -1,6 +1,7 @@
 #pragma once
 #include "../../nclgl/OGLRenderer.h"
 #include "../../nclgl/Camera.h"
+#include "../../nclgl/OBJmesh.h" 
 #include "../../nclgl/HeightMap.h"
 #include "../../nclgl/SceneNode.h"
 #include "../../nclgl/CubeRoot.h"
@@ -9,7 +10,7 @@
 #include "ParticleEmitter.h"	//A new class!
 #include <stdio.h> 
 #include "textmesh.h"
-
+#define LIGHTNUM 8
 #define SHADOWSIZE 2048//New!
 
 class Renderer : public OGLRenderer {
@@ -29,13 +30,14 @@ protected:
 	void DrawCube();
 	void DrawMesh(); // New !
 	void DrawFloor(); // New !
-
 	void DrawShadowScene(); // New !
-	
 	void DrawCombinedScene(); // New !
 	void DrawFPS();
 	void DrawParticle();
-	void DrawHell();
+	void FillBuffers(); //G-Buffer Fill Render Pass 
+	void DrawPointLights(); //Lighting Render Pass 
+	void CombineBuffers(); //Combination Render Pass 
+	void GenerateScreenTexture(GLuint &into, bool depth = false);//Make a new texture... 
 	void DrawScene_A();
 	void DrawScene_B();
 	void DrawScene_C();
@@ -56,14 +58,20 @@ protected:
 	Shader * sceneShader;
 	Shader * shadowShader;
 	Shader * particleShader;
-
+	Shader* _sceneShader; //Shader to fill our GBuffers 
+	Shader* pointlightShader; //Shader to calculate lighting 
+	Shader* combineShader; //shader to stick it all together 
+	
 	HeightMap * heightMap;
+	Mesh* _heightMap; //Terrain! 
 	Mesh * quad;
+	Mesh * _quad;
 
 	Mesh * floor;
 	Light * light;
+	Light* pointLights; //Array of lighting data 
 	Font*	basicFont;	//A font! a basic one...
-
+	OBJMesh* sphere; //Light volume 
 	MD5FileData * hellData;
 	MD5Node * hellNode;
 	Camera * camera;
@@ -71,15 +79,25 @@ protected:
 	GLuint shadowTex;
 	GLuint shadowFBO;
 
+	GLuint bufferFBO; //FBO for our G-Buffer pass 
+	GLuint bufferColourTex; //Albedo goes here 
+	GLuint bufferNormalTex; //Normals go here 
+	GLuint bufferDepthTex; //Depth goes here 
+	GLuint pointLightFBO; //FBO for our lighting pass 
+	GLuint lightEmissiveTex; //Store emissive lighting 
+	GLuint lightSpecularTex; //Store specular lighting 
+
 	ParticleEmitter*	emitter;	//A single particle emitter
 
-	Vector3 cam_S1_OriPos=Vector3(-2855,833,3276);
-	double S1_CamOriPitch = 1;
-	double S1_CamOriYalw = 319;
+	Vector3 cam_S1_OriPos=Vector3(-1239,1678,3616);
+	double S1_CamOriPitch = -18;
+	double S1_CamOriYalw = 334;
 	Vector3 cam_S2_OriPos= Vector3(-1239, 1678, 3616);
 	double S2_CamOriPitch = -18;
-	double S2_CamOriYalw =334;
-	Vector3 cam_S3_OriPos;
+	double S2_CamOriYalw = 334;
+	Vector3 cam_S3_OriPos = Vector3(-2087,2843, 5308);
+	double S3_CamOriPitch = -25;
+	double S3_CamOriYalw = 309;
 
 
 
@@ -108,7 +126,7 @@ protected:
 	float hellNightZ=0;
 	float timec = 0.0f;
 	float stopCD = 0.0f;
-	
+	float rotation; //How much to increase rotation by
 	int dir = 1;
 	int curScene = 1;
 

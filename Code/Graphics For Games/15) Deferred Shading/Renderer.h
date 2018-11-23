@@ -18,8 +18,8 @@ protected:
 	void FillBuffers(); //G-Buffer Fill Render Pass 
 	void DrawPointLights(); //Lighting Render Pass 
 	void CombineBuffers(); //Combination Render Pass 
-						   //Make a new texture... 
-	void GenerateScreenTexture(GLuint &into , bool depth = false);
+						   
+	void GenerateScreenTexture(GLuint &into , bool depth = false);//Make a new texture... 
 
 	Shader* sceneShader; //Shader to fill our GBuffers 
 	Shader* pointlightShader; //Shader to calculate lighting 

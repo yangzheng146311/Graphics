@@ -88,6 +88,7 @@ Renderer::Renderer(Window &parent) : OGLRenderer(parent) {
 	init = true; 
 
 }
+
 Renderer::~Renderer(void) {
 	
 	delete sceneShader; 
@@ -108,6 +109,7 @@ Renderer::~Renderer(void) {
 	currentShader = 0; 
 
 }
+
 void Renderer::GenerateScreenTexture(GLuint &into, bool depth) { 
 	glGenTextures(1, &into); 
 	glBindTexture(GL_TEXTURE_2D, into); 

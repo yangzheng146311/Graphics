@@ -5,7 +5,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	CubeRobot::CreateCube(); //Important!
 	camera = new Camera();
 	heightMap = new HeightMap("../../Textures/terrain.raw");
-
+	_heightMap = new HeightMap("../../Textures/lalala.raw");
 	hellData = new MD5FileData("../../Meshes/hellknight.md5mesh");
 	hellNode = new MD5Node(*hellData);
 	hellData->AddAnim("../../Meshes/idle2.md5anim");
@@ -14,14 +14,34 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	hellNode->PlayAnim("../../Meshes/idle2.md5anim");
 	
 	quad = Mesh::GenerateQuad();
+	_quad = Mesh::GenerateQuad();
 	//camera->SetPosition(Vector3(RAW_WIDTH * HEIGHTMAP_X / 2.0f, 2500.0f, RAW_WIDTH * HEIGHTMAP_X));
 
-
-	
+	sphere = new OBJMesh();
+	if (!sphere->LoadOBJMesh("../../Meshes/ico.obj")) {
+		return;
+	}
+	rotation = 0.0f;
 
 	camera->SetPosition(cam_S1_OriPos);
 	camera->SetPitch(S1_CamOriPitch);
 	camera->SetYaw(S1_CamOriYalw);
+
+	pointLights = new Light[LIGHTNUM*LIGHTNUM];
+	for (int x = 0; x < LIGHTNUM; ++x) {
+		for (int z = 0; z < LIGHTNUM; ++z) {
+			Light &l = pointLights[(x*LIGHTNUM) + z];
+			float xPos = (RAW_WIDTH*HEIGHTMAP_X / (LIGHTNUM - 1)) * x;
+			float zPos = (RAW_HEIGHT*HEIGHTMAP_Z / (LIGHTNUM - 1)) * z;
+			l.SetPosition(Vector3(xPos, 100.0f, zPos));
+			float r = 0.5f + (float)(rand() % 129) / 128.0f;
+			float g = 0.5f + (float)(rand() % 129) / 128.0f;
+			float b = 0.5f + (float)(rand() % 129) / 128.0f;
+			l.SetColour(Vector4(r, g, b, 1.0f));
+			float radius = (RAW_WIDTH*HEIGHTMAP_X / LIGHTNUM);
+			l.SetRadius(radius);
+		}
+	}
 
 	light = new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f-1000.0f), 500.0f, 
 		(RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)), 
@@ -44,8 +64,11 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	skyboxShader = new Shader("../../Shaders/skyboxVertex.glsl", "../../Shaders/skyboxFragment.glsl");
 	lightShader = new Shader("../../Shaders/PerPixelVertex.glsl", "../../Shaders/PerPixelFragment.glsl");
 	sceneShader = new Shader("../../Shaders/shadowscenevert.glsl", "../../Shaders/shadowscenefrag.glsl");
+	_sceneShader = new Shader("../../Shaders/BumpVertex.glsl","../../Shaders/bufferFragment.glsl");
+	combineShader = new Shader("../../Shaders/combinevert.glsl", "../../Shaders/combinefrag.glsl");
 	shadowShader = new Shader("../../Shaders/shadowVert.glsl", "../../Shaders/shadowFrag.glsl");
 	textShader= new Shader(SHADERDIR"TexturedVertex.glsl", SHADERDIR"TexturedFragment.glsl");
+	pointlightShader = new Shader("../../Shaders/pointlightvertex.glsl","../../Shaders/pointlightfragment.glsl");
 	particleShader = new Shader("../../Shaders/vertex.glsl",
 		"../../Shaders/fragment.glsl",
 		"../../Shaders/geometry.glsl");
@@ -53,7 +76,8 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 
 	if (!cubeShader->LinkProgram()||!reflectShader->LinkProgram()|| !lightShader->LinkProgram() ||
 		!skyboxShader->LinkProgram()||!sceneShader->LinkProgram()||!shadowShader->LinkProgram() || 
-		!textShader->LinkProgram()||!particleShader->LinkProgram()) {
+		!textShader->LinkProgram()||!particleShader->LinkProgram()
+		||!_sceneShader->LinkProgram() || !combineShader->LinkProgram() || !pointlightShader->LinkProgram()) {
 		return;
 
 	}
@@ -66,7 +90,6 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOWSIZE, SHADOWSIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -76,6 +99,46 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTex, 0);
 	glDrawBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
+	glGenFramebuffers(1, &bufferFBO);
+	glGenFramebuffers(1, &pointLightFBO);
+	GLenum buffers[2];
+	buffers[0] = GL_COLOR_ATTACHMENT0;
+	buffers[1] = GL_COLOR_ATTACHMENT1;
+	//Generate our scene depth texture... 
+	GenerateScreenTexture(bufferDepthTex, true);
+	GenerateScreenTexture(bufferColourTex);
+	GenerateScreenTexture(bufferNormalTex);
+	GenerateScreenTexture(lightEmissiveTex);
+	GenerateScreenTexture(lightSpecularTex);
+	//And now attach them to our FBOs 
+	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+		GL_TEXTURE_2D, bufferColourTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+		GL_TEXTURE_2D, bufferNormalTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+		GL_TEXTURE_2D, bufferDepthTex, 0);
+	glDrawBuffers(2, buffers);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) !=
+		GL_FRAMEBUFFER_COMPLETE) {
+		return;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, pointLightFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+		GL_TEXTURE_2D, lightEmissiveTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1,
+		GL_TEXTURE_2D, lightSpecularTex, 0);
+	glDrawBuffers(2, buffers);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		return;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
+
 
 	floor = Mesh::GenerateQuad();
 	floor->SetTexture(SOIL_load_OGL_texture("../../Textures/brick.tga", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
@@ -88,7 +151,12 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	quad->SetTexture(SOIL_load_OGL_texture("../../MyTextures/water1.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	heightMap->SetTexture(SOIL_load_OGL_texture("../../MyTextures/barren.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	heightMap->SetBumpMap(SOIL_load_OGL_texture("../../MyTextures/barren_normal.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-	
+	_heightMap->SetTexture(SOIL_load_OGL_texture(
+		"../../Textures/Barren Reds.JPG", SOIL_LOAD_AUTO,
+		SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	_heightMap->SetBumpMap(SOIL_load_OGL_texture(
+		"../../Textures/Barren RedsDOT3.tga", SOIL_LOAD_AUTO,
+		SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
 	cubeMap = SOIL_load_OGL_cubemap("../../MyTextures/purplenebula_lf.tga",
 		"../../MyTextures/purplenebula_rt.tga",
 		"../../MyTextures/purplenebula_up.tga",
@@ -104,11 +172,13 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	SetTextureRepeating(quad->GetTexture(), true);
 	SetTextureRepeating(heightMap->GetTexture(), true);
 	SetTextureRepeating(heightMap->GetBumpMap(), true);
-
+	SetTextureRepeating(_heightMap->GetTexture(), true);
+	SetTextureRepeating(_heightMap->GetBumpMap(), true);
 
 	waterRotate = 0.0f;
 	projMatrix = Matrix4::Perspective(1.0f, 15000.0f, (float)width / (float)height, 45.0f);
 	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -120,7 +190,12 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 Renderer ::~Renderer(void) {
 	glDeleteTextures(1, &shadowTex);
 	glDeleteFramebuffers(1, &shadowFBO);
-
+	glDeleteFramebuffers(1, &bufferFBO);
+	glDeleteFramebuffers(1, &pointLightFBO);
+	delete _heightMap;
+	delete sphere;
+	delete _quad;
+	delete[] pointLights;
 	delete camera;
 	delete heightMap;
 	delete quad;
@@ -130,20 +205,27 @@ Renderer ::~Renderer(void) {
 	delete lightShader;
 	delete sceneShader;
 	delete shadowShader;
+	delete _sceneShader;
+	delete combineShader;
+	delete pointlightShader;
 	delete floor;
 	delete light;
 	delete root;
 	delete hellData;
 	delete hellNode;
 	delete basicFont;
-
+	glDeleteTextures(1, &bufferColourTex);
+	glDeleteTextures(1, &bufferNormalTex);
+	glDeleteTextures(1, &bufferDepthTex);
+	glDeleteTextures(1, &lightEmissiveTex);
+	glDeleteTextures(1, &lightSpecularTex);
 	
 	currentShader = NULL;
 	CubeRobot::DeleteCube(); //Also important!
 	CubeRobot::DeleteSphere(); //Also important!
 
 
-	currentShader = 0;
+	//currentShader = 0;
 
 }
 
@@ -179,6 +261,7 @@ void Renderer::UpdateScene(float msec) {
 	{
 		timec += 1;
 	}
+
 	if (curScene == 1)
 	{
 		if (timec == 100) hellNode->PlayAnim("../../Meshes/walk7.md5anim");
@@ -238,23 +321,19 @@ void Renderer::UpdateScene(float msec) {
 
 
 		}
-
-		
 		
 		if (Window::GetKeyboard()->KeyDown(KEYBOARD_RIGHT))
 		{
-			curScene++;
+			curScene = 2;
 			hellNode->PlayAnim("../../Meshes/idle2.md5anim");
-			if (curScene == 2)
-			{
+			
 				hellNightY = 2000.0f;
 				hellNightX = 0;
 				hellNightZ = 0;
 				camera->SetPosition(cam_S2_OriPos);
 				camera->SetPitch(S2_CamOriPitch);
 				camera->SetYaw(S2_CamOriYalw);
-			}
-			timec = 0;
+			    timec = 0;
 		}
 	}
 
@@ -266,29 +345,56 @@ void Renderer::UpdateScene(float msec) {
 		if (timec == 300)
 			lightOn = true;
 
+		/*if (timec > 600)
+		{
+			curScene++;
+			timec = 0;
+		}*/
+
 		if (Window::GetKeyboard()->KeyDown(KEYBOARD_LEFT))
 		{
-
-			curScene--;
-			
-			if (curScene == 1)
-			{
-				hellNode->PlayAnim("../../Meshes/idle2.md5anim");
-				light->SetPosition(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f - 1000.0f), 500.0f,
+			curScene=1;
+			hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+			light->SetPosition(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f - 1000.0f), 500.0f,
 					(RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)));
-				light->SetColour(Vector4(1.0f, 1.0f, 1.0f, 1));
-				light->SetRadius((RAW_WIDTH * HEIGHTMAP_X) / 0.2f);
-				lightOn = false;
-				hellNightY = 110.0f;
-				hellNightX = 0;
-				hellNightZ = 0;
-				camera->SetPosition(cam_S1_OriPos);
-				camera->SetPitch(S1_CamOriPitch);
-				camera->SetYaw(S1_CamOriYalw);
-			}
+			light->SetColour(Vector4(1.0f, 1.0f, 1.0f, 1));
+			light->SetRadius((RAW_WIDTH * HEIGHTMAP_X) / 0.2f);
+			lightOn = false;
+			hellNightY = 110.0f;
+			hellNightX = 0;
+			hellNightZ = 0;
+			camera->SetPosition(cam_S1_OriPos);
+			camera->SetPitch(S1_CamOriPitch);
+			camera->SetYaw(S1_CamOriYalw);
 			timec = 0;
 		}
+
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_RIGHT))
+		{
+			    curScene=3;
+				camera->SetPosition(cam_S3_OriPos);
+				camera->SetPitch(S3_CamOriPitch);
+				camera->SetYaw(S3_CamOriYalw);
+			    timec = 0;
+		}
 		
+	}
+
+	if (curScene == 3) {
+
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_LEFT))
+		{
+			curScene = 2;
+			hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+			hellNightY = 2000.0f;
+			hellNightX = 0;
+			hellNightZ = 0;
+			camera->SetPosition(cam_S2_OriPos);
+			camera->SetPitch(S2_CamOriPitch);
+			camera->SetYaw(S2_CamOriYalw);
+			timec = 0;
+		}
+	
 	}
 
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_SPACE))
@@ -351,6 +457,12 @@ void Renderer::UpdateScene(float msec) {
 			{
 
 				lightOff = false;
+				curScene++;
+				timec = 0;
+				lightOn = false;
+				camera->SetPosition(cam_S3_OriPos);
+				camera->SetPitch(S3_CamOriPitch);
+				camera->SetYaw(S3_CamOriYalw);
 			}
 
 
@@ -432,6 +544,7 @@ void Renderer::UpdateScene(float msec) {
 	viewMatrix = camera->BuildViewMatrix();
 	root->Update(msec);
 	hellNode->Update(msec);
+	rotation = msec * 0.01f;
 	waterRotate += msec / 1000.0f;
 	cout <<"pitch:"<< camera->GetPitch() << endl;
 	cout << "yalw:"<<camera->GetYaw() << endl;
@@ -448,7 +561,7 @@ void Renderer::RenderScene() {
 
 	if(curScene==2)   DrawScene_B();
 
-
+	if (curScene == 3)  DrawScene_C();
 
 	SwapBuffers();
 
@@ -667,30 +780,6 @@ void Renderer::DrawFloor() {
 
 }
 
-void Renderer::DrawHell()
-{
-	SetCurrentShader(sceneShader);
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "bumpTex"), 1);
-	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "shadowTex"), 2);
-	glUniform3fv(glGetUniformLocation(currentShader->GetProgram(), "cameraPos"), 1, (float*)&camera->GetPosition());
-	SetShaderLight(*light);
-	
-	
-	modelMatrix.ToIdentity();
-	modelMatrix.SetPositionVector(Vector3(hellNightX, hellNightY, 600));
-	
-	Matrix4 tempMatrix = textureMatrix * modelMatrix;
-	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "textureMatrix"), 1, false, *&tempMatrix.values);
-	glUniformMatrix4fv(glGetUniformLocation(currentShader->GetProgram(), "modelMatrix"), 1, false, *&modelMatrix.values);
-
-
-	hellNode->Draw(*this);
-
-	
-
-}
-
 void Renderer::DrawText(const std::string &text, const Vector3 &position, const float size, const bool perspective) {
 		//Create a new temporary TextMesh, using our line of text and our font
 	TextMesh* mesh = new TextMesh(text,*basicFont);
@@ -757,5 +846,120 @@ void Renderer::DrawScene_B()
 
 void Renderer::DrawScene_C()
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	DrawFPS();
 	
+	FillBuffers();
+	DrawPointLights();
+	CombineBuffers();
+	
+}
+
+void Renderer::GenerateScreenTexture(GLuint &into, bool depth) {
+	glGenTextures(1, &into);
+	glBindTexture(GL_TEXTURE_2D, into);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0,
+		depth ? GL_DEPTH_COMPONENT24 : GL_RGBA8,
+		width, height, 0,
+		depth ? GL_DEPTH_COMPONENT : GL_RGBA,
+		GL_UNSIGNED_BYTE, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Renderer::FillBuffers() {
+	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	SetCurrentShader(_sceneShader);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
+		"diffuseTex"), 0);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
+		"bumpTex"), 1);
+	projMatrix = Matrix4::Perspective(1.0f, 10000.0f,
+		(float)width / (float)height, 45.0f);
+	modelMatrix.ToIdentity();
+	UpdateShaderMatrices();
+	_heightMap->Draw();
+	glUseProgram(0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::DrawPointLights() {
+
+	SetCurrentShader(pointlightShader);
+	glBindFramebuffer(GL_FRAMEBUFFER, pointLightFBO);
+	glClearColor(0, 0, 0, 1);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glBlendFunc(GL_ONE, GL_ONE);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
+		"depthTex"), 3);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
+		"normTex"), 4);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, bufferNormalTex);
+	glUniform3fv(glGetUniformLocation(currentShader->GetProgram(),
+		"cameraPos"), 1, (float*)&camera->GetPosition());
+	glUniform2f(glGetUniformLocation(currentShader->GetProgram(),
+		"pixelSize"), 1.0f / width, 1.0f / height);
+	Vector3 translate = Vector3((RAW_HEIGHT*HEIGHTMAP_X / 2.0f), 500,
+		(RAW_HEIGHT*HEIGHTMAP_Z / 2.0f));
+	Matrix4 pushMatrix = Matrix4::Translation(translate);
+	Matrix4 popMatrix = Matrix4::Translation(-translate);
+	for (int x = 0; x < LIGHTNUM; ++x) {
+
+		for (int z = 0; z < LIGHTNUM; ++z) {
+
+			Light &l = pointLights[(x*LIGHTNUM) + z];
+			float radius = l.GetRadius();
+			modelMatrix =
+				pushMatrix *
+				Matrix4::Rotation(rotation, Vector3(0, 1, 0)) *
+				popMatrix *
+				Matrix4::Translation(l.GetPosition()) *
+				Matrix4::Scale(Vector3(radius, radius, radius));
+			l.SetPosition(modelMatrix.GetPositionVector());
+			SetShaderLight(l);
+			UpdateShaderMatrices();
+			float dist = (l.GetPosition() - camera->GetPosition()).Length();
+			if (dist < radius) {//camera is inside the light volume! 
+				glCullFace(GL_FRONT);
+			}
+			else {
+				glCullFace(GL_BACK);
+			}
+			sphere->Draw();
+		}
+	}
+	glCullFace(GL_BACK);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glClearColor(0.2f, 0.2f, 0.2f, 1);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glUseProgram(0);
+
+}
+
+void Renderer::CombineBuffers() {
+	SetCurrentShader(combineShader);
+	projMatrix = Matrix4::Orthographic(-1, 1, 1, -1, -1, 1);
+	UpdateShaderMatrices();
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
+		"diffuseTex"), 2);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
+		"emissiveTex"), 3);
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
+		"specularTex"), 4);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, bufferColourTex);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, lightEmissiveTex);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, lightSpecularTex);
+	_quad->Draw();
+	glUseProgram(0);
 }
