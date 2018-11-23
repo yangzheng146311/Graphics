@@ -73,7 +73,14 @@ protected:
 
 	ParticleEmitter*	emitter;	//A single particle emitter
 
-	
+	Vector3 cam_S1_OriPos=Vector3(-2855,833,3276);
+	double S1_CamOriPitch = 1;
+	double S1_CamOriYalw = 319;
+	Vector3 cam_S2_OriPos= Vector3(-1239, 1678, 3616);
+	double S2_CamOriPitch = -18;
+	double S2_CamOriYalw =334;
+	Vector3 cam_S3_OriPos;
+
 
 
 	float waterRotate;
@@ -91,11 +98,7 @@ protected:
 	float LightOriginPosZ;
 	float LightOriginPosY;
 	float LightOriginPosX;
-	double CamOriX= 434;
-	double CamOriY= 835.0f;
-	double CamOriZ= 687.0f;
-	double CamOriPitch = -22.0f;
-	double CamOriYaw =55.0f;
+	
 	double curYaw;
 	float curMsec;
 

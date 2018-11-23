@@ -19,14 +19,17 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 
 	
 
-	camera->SetPosition(Vector3(CamOriX, CamOriY,CamOriZ));
-	camera->SetPitch(CamOriPitch);
-	camera->SetYaw(CamOriYaw);
+	camera->SetPosition(cam_S1_OriPos);
+	camera->SetPitch(S1_CamOriPitch);
+	camera->SetYaw(S1_CamOriYalw);
 
-	light = new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f-1000.0f), 500.0f, (RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)), Vector4(1.0f, 1.0f, 1.0f, 1), (RAW_WIDTH * HEIGHTMAP_X) / 0.2f);
-	CamOriX = camera->GetPosition().x;
+	light = new Light(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f-1000.0f), 500.0f, 
+		(RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)), 
+		Vector4(1.0f, 1.0f, 1.0f, 1),
+		(RAW_WIDTH * HEIGHTMAP_X) / 0.2f);
+	/*CamOriX = camera->GetPosition().x;
 	CamOriY = camera->GetPosition().y;
-	CamOriZ = camera->GetPosition().z;
+	CamOriZ = camera->GetPosition().z;*/
 	curYaw = 0.0f;
 	LightOriginRadius = light->GetRadius();
 	LightOriginPosZ = light->GetPosition().z;
@@ -152,12 +155,12 @@ void Renderer::UpdateScene(float msec) {
 
 	if (curScene == 1)
 	{
-		if (timec == 200) hellNode->PlayAnim("../../Meshes/walk7.md5anim");
-		if (timec > 200)
+		if (timec == 100) hellNode->PlayAnim("../../Meshes/walk7.md5anim");
+		if (timec > 100)
 		{
 			if (hellNightX > -800)
 			{
-				hellNightX -= 6;
+				hellNightX -= 15;
 			}
 
 			else
@@ -169,7 +172,7 @@ void Renderer::UpdateScene(float msec) {
 				}
 		}
 
-		if (timec > 300)
+		if (timec > 200)
 		{
 			if (aniAttack == false)
 			{
@@ -179,7 +182,7 @@ void Renderer::UpdateScene(float msec) {
 			}
 		}
 
-		if (timec > 450)
+		if (timec > 400)
 		{
 
 			if (aniIdle == false)
@@ -192,19 +195,22 @@ void Renderer::UpdateScene(float msec) {
 			hellNightY += 8;
 		}
 
-
 		
-		if (Window::GetKeyboard()->KeyDown(KEYBOARD_SPACE))
+		
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_RIGHT))
 		{
 			curScene++;
+			hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+			if (curScene == 2)
+			{
+				hellNightY = 2000.0f;
+				hellNightX = 0;
+				hellNightZ = 0;
+				camera->SetPosition(cam_S2_OriPos);
+				camera->SetPitch(S2_CamOriPitch);
+				camera->SetYaw(S2_CamOriYalw);
+			}
 			timec = 0;
-			hellNightY +=2000.0f;
-			hellNightX = 0;
-			hellNightZ = 0;
-			camera->SetPosition(Vector3(-1239, 1678, 3616));
-			camera->SetPitch(-9);
-			camera->SetYaw(341);
-
 		}
 	}
 
@@ -213,12 +219,33 @@ void Renderer::UpdateScene(float msec) {
 		if(hellNightY>100)
 		hellNightY -= 8;
 		
-		if (timec = 200)
+		if (timec == 300)
 			lightOn = true;
+
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_LEFT))
+		{
+
+			curScene--;
+			
+			if (curScene == 1)
+			{
+				hellNode->PlayAnim("../../Meshes/idle2.md5anim");
+				light->SetPosition(Vector3((RAW_HEIGHT * HEIGHTMAP_X / 2.0f - 1000.0f), 500.0f,
+					(RAW_HEIGHT * HEIGHTMAP_Z / 2.0f)));
+				light->SetColour(Vector4(1.0f, 1.0f, 1.0f, 1));
+				light->SetRadius((RAW_WIDTH * HEIGHTMAP_X) / 0.2f);
+				lightOn = false;
+				hellNightY = 110.0f;
+				hellNightX = 0;
+				hellNightZ = 0;
+				camera->SetPosition(cam_S1_OriPos);
+				camera->SetPitch(S1_CamOriPitch);
+				camera->SetYaw(S1_CamOriYalw);
+			}
+			timec = 0;
+		}
 		
 	}
-
-
 
 	if (Window::GetKeyboard()->KeyDown(KEYBOARD_SPACE))
 	{
@@ -359,11 +386,8 @@ void Renderer::UpdateScene(float msec) {
 	emitter->Update(msec);
 	camera->UpdateCamera(msec);
 	viewMatrix = camera->BuildViewMatrix();
-	
 	root->Update(msec);
-
 	hellNode->Update(msec);
-
 	waterRotate += msec / 1000.0f;
 	cout <<"pitch:"<< camera->GetPitch() << endl;
 	cout << "yalw:"<<camera->GetYaw() << endl;
@@ -496,7 +520,6 @@ void Renderer::DrawShadowScene() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-
 void Renderer::DrawCombinedScene() {
 	SetCurrentShader(sceneShader);
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(), "diffuseTex"), 0);
@@ -557,8 +580,7 @@ void Renderer::DrawParticle()
 	glUseProgram(0);
 }
 
-
-void	Renderer::SetShaderParticleSize(float f) {
+void Renderer::SetShaderParticleSize(float f) {
 	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "particleSize"), f);
 }
 
@@ -584,8 +606,6 @@ void Renderer::DrawMesh() {
    
 	hellNode->Draw(*this);
 }
-
-
 
 void Renderer::DrawFloor() {
 	modelMatrix.ToIdentity();
@@ -651,11 +671,6 @@ void Renderer::DrawText(const std::string &text, const Vector3 &position, const 
 	delete mesh; //Once it's drawn, we don't need it anymore!
 }
 
-
-
-
-
-
 void Renderer::DrawScene_A()
 {
 	/*camera->SetPosition(Vector3(-429, 499, 1947));
@@ -664,11 +679,15 @@ void Renderer::DrawScene_A()
 
 	DrawSkybox();
 
+	modelMatrix.ToIdentity();
+	textureMatrix.ToIdentity();
+	UpdateShaderMatrices();
 	DrawFPS();
+
 	DrawShadowScene(); // First render pass ...
 	DrawCombinedScene(); // Second render pass ...
-	if(timec>450)
-	DrawParticle();
+	/*if(timec>450)
+	DrawParticle();*/
 }
 
 void Renderer::DrawScene_B()
@@ -681,11 +700,14 @@ void Renderer::DrawScene_B()
 	
 	DrawShadowScene(); // First render pass ...
 	DrawCombinedScene(); // Second render pass ...
-	DrawCube();
-	DrawParticle();
+
+	if (timec > 300)
+	{
+		DrawCube();
+		DrawParticle();
+	}
+	
 }
-
-
 
 void Renderer::DrawScene_C()
 {

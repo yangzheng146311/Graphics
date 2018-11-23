@@ -14,7 +14,7 @@ SceneNode*body = new SceneNode(0, Vector4(1, 1, 1, 0)); //Red!
 //body->SetModelScale(Vector3(10, 15, 50));
 body->SetModelScale(Vector3(150, 150, 150));
 //body->SetTransform(Matrix4::Translation(Vector3(0, 800,0 )));
-body->SetTransform(Matrix4::Translation(Vector3(0, 2000, 0)));
+body->SetTransform(Matrix4::Translation(Vector3(0, 1000, 0)));
 AddChild(body);
 
 head = new SceneNode(cube, Vector4(0.5f, 0.6f, 0.4f, 0)); //Green!
